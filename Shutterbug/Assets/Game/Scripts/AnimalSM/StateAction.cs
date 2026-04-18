@@ -1,0 +1,10 @@
+namespace Game.Scripts
+{
+    public enum StateAction
+    {
+        Stay,
+        GoToIdle,
+        GoToWalk,
+        GoToFlee
+    }
+}
