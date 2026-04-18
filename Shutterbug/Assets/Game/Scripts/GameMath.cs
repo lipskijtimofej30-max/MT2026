@@ -14,7 +14,8 @@ public class GameMath
 
     public float DistanceToPlayer(Transform transform)
     {
-        return Vector3.Distance(transform.position, _player.gameObject.transform.position);
+        var dist = Vector3.Distance(transform.position, _player.transform.position);
+        return dist;
     }
 
     public Vector3 GetDirectionToPlayer(Transform transform)

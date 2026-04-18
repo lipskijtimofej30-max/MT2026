@@ -9,22 +9,24 @@ namespace Game.Scripts.Service
     public class PhotoProviderView : MonoBehaviour
     {
         [SerializeField] private RawImage _image;
-        [SerializeField] private CanvasGroup _canvasGroup; // Для плавного появления/исчезновения
+        [SerializeField] private CanvasGroup _canvasGroup;
 
-        [Header("Animation Settings")] [SerializeField]
-        private float _flyDuration = 0.5f;
+        [Header("Animation Settings")] 
+        [SerializeField] private float _flyDuration = 0.5f;
 
         [SerializeField] private float _displayTime = 2f;
         [SerializeField] private float _fadeOutDuration = 0.4f;
 
         private IPhotoProvider _photoProvider;
+        private PlayerController _playerController;
         private Vector2 _targetPosition;
         private Coroutine _currentAnimation;
 
         [Inject]
-        private void Construct(IPhotoProvider photoProvider)
+        private void Construct(IPhotoProvider photoProvider, PlayerController playerController)
         {
             _photoProvider = photoProvider;
+            _playerController = playerController;
         }
 
         private void Awake()
@@ -53,7 +55,6 @@ namespace Game.Scripts.Service
         {
             if (_currentAnimation != null)
                 StopCoroutine(_currentAnimation);
-
             _currentAnimation = StartCoroutine(ShowFlashReveal(texture));
         }
 
@@ -61,9 +62,11 @@ namespace Game.Scripts.Service
         {
             _image.texture = texture;
             _image.gameObject.SetActive(true);
+            _playerController.ToggleController(false);
             _canvasGroup.alpha = 0f;
-
-            // Создаём временную «вспышку» (белый Image поверх всего)
+            
+            _playerController.ShakeCamera(0.3f, 1f);
+            
             GameObject flash = new GameObject("Flash", typeof(RectTransform), typeof(Image));
             flash.transform.SetParent(transform, false);
             flash.GetComponent<Image>().color = Color.white;
@@ -76,13 +79,10 @@ namespace Game.Scripts.Service
             CanvasGroup flashCg = flash.AddComponent<CanvasGroup>();
             flashCg.alpha = 1f;
 
-            // Фото слегка уменьшено и размыто (можно добавить, если есть шейдер)
             _image.rectTransform.localScale = Vector3.one * 0.95f;
 
             Sequence reveal = DOTween.Sequence();
-            // Вспышка затухает, открывая фото
             reveal.Append(flashCg.DOFade(0f, 0.4f).SetEase(Ease.InSine));
-            // Параллельно фото плавно появляется и слегка увеличивается
             reveal.Join(_canvasGroup.DOFade(1f, 0.6f).SetEase(Ease.OutSine));
             reveal.Join(_image.rectTransform.DOScale(1f, 0.6f).SetEase(Ease.OutBack));
 
@@ -95,6 +95,7 @@ namespace Game.Scripts.Service
             yield return _canvasGroup.DOFade(0f, _fadeOutDuration).WaitForCompletion();
 
             _image.gameObject.SetActive(false);
+            _playerController.ToggleController(true);
             _currentAnimation = null;
         }
     }

@@ -17,14 +17,7 @@ public class CameraCapture : MonoBehaviour
     {
         _photoProvider = photoProvider;
     }
-
-    private async void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            await Capture();
-        }
-    }
+    
 
     public async UniTask Capture()
     {

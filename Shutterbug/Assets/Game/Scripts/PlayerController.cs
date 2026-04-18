@@ -26,7 +26,6 @@ namespace Game.Scripts
         [SerializeField] private float shakeStrength = 1f;
         [SerializeField] private int shakeVibrato = 10;
         
-        // Приватные переменные
         private Vector3 moveDirection;
         private Vector3 velocity;
         private float currentSpeed;
@@ -37,6 +36,7 @@ namespace Game.Scripts
 
         private void Awake()
         {
+            Cursor.lockState = CursorLockMode.Locked;
             controller = GetComponent<CharacterController>();
             currentSpeed = moveSpeed;
             
@@ -69,7 +69,6 @@ namespace Game.Scripts
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
     
-            // Берём направления камеры, но только в горизонтальной плоскости (игнорируем наклон вверх/вниз)
             Vector3 camForward = cameraTransform.forward;
             Vector3 camRight = cameraTransform.right;
             camForward.y = 0f;
@@ -77,10 +76,8 @@ namespace Game.Scripts
             camForward.Normalize();
             camRight.Normalize();
 
-            // Рассчитываем целевое направление движения в мировых координатах
             Vector3 desiredMoveDirection = (camForward * vertical + camRight * horizontal).normalized;
     
-            // Просто запоминаем направление, без поворота персонажа
             moveDirection = desiredMoveDirection;
         }
 
@@ -132,5 +129,12 @@ namespace Game.Scripts
                 virtualCamera.transform.DOShakePosition(duration, strength, shakeVibrato).SetUpdate(true);
             }
         }
+        
+        public void ToggleController(bool toggle)
+        {
+            virtualCamera.enabled = toggle;
+            enabled = toggle;
+        }
+
     }
 }

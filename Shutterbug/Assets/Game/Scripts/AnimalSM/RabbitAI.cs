@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -7,9 +6,11 @@ using Zenject;
 
 namespace Game.Scripts
 {
-    public class BunnyAI : MonoBehaviour
+    public class RabbitAI : MonoBehaviour
     {
         [SerializeField] private NavMeshAgent _agent;
+        [SerializeField] private Animator _animator;
+        [SerializeField] private float _distanceToFlee = 15f;
         private StateMachine _stateMachine;
         private GameMath _gameMath;
         
@@ -25,9 +26,10 @@ namespace Game.Scripts
 
         private async UniTask Start()
         {
-            _idleState = new IdleState(0.3f, 1f);
-            _walkState = new WalkState(_agent, _gameMath, 7f, 5f);
-            _fleeState = new FleeState(_agent, _gameMath, 7f);
+            Debug.Log($"Distance to flee: {_distanceToFlee}");
+            _idleState = new IdleState(_gameMath,_agent, _animator, _distanceToFlee,0.3f, 1f);
+            _walkState = new WalkState(_agent, _gameMath, _animator, _distanceToFlee, 5f);
+            _fleeState = new FleeState(_agent, _gameMath, _animator, _distanceToFlee);
 
             Dictionary<StateAction, IState> map = new Dictionary<StateAction, IState>
             {

@@ -43,7 +43,6 @@ public class StateMachine : IDisposable
     {
         while (_isRunning)
         {
-            // Отменяем предыдущую операцию, если она ещё выполняется
             _cts?.Cancel();
             _cts?.Dispose();
             _cts = new CancellationTokenSource();
@@ -57,8 +56,7 @@ public class StateMachine : IDisposable
             }
             catch (OperationCanceledException)
             {
-                // Состояние было прервано переходом в новое состояние — продолжаем цикл
-                continue;
+                break;
             }
             catch (Exception e)
             {
