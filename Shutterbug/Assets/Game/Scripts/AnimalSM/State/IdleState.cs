@@ -13,6 +13,8 @@ namespace Game.Scripts
         private GameMath _gameMath;
         private NavMeshAgent _agent;
         private Animator _animator;
+        public AnimalState StateType => AnimalState.Idle;
+
 
         public IdleState(GameMath gameMath,NavMeshAgent agent,Animator animator, float distToFlee, float minTime, float maxTime)
         {
@@ -23,6 +25,7 @@ namespace Game.Scripts
             _minTimeIdle = minTime;
             _maxTimeIdle = maxTime;
         }
+        
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
             float elapsed = 0f;

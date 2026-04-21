@@ -15,6 +15,8 @@ public class StateMachine : IDisposable
     
     public IState CurrentState => _currentState;
 
+    public AnimalState CurrentAnimalState => _currentState?.StateType ?? AnimalState.Idle;
+
     public StateMachine(Dictionary<StateAction, IState> map)
     {
         _transitionMap = map;

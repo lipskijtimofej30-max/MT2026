@@ -13,7 +13,9 @@ namespace Game.Scripts
         private readonly float _safeDistance;
         private readonly float _fleeDistance = 8f;
         private readonly int _maxAttempts = 10;
-
+        
+        public AnimalState StateType => AnimalState.Flee;
+        
         public FleeState(NavMeshAgent agent, GameMath gameMath, Animator animator, float safeDistance)
         {
             _agent = agent;

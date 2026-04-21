@@ -6,13 +6,9 @@ namespace Game.Scripts
 {
     public class PhotoEvaluator
     {
-        public PhotoScore CalculateScore(BaseAnimalAI animalAI,Type stateForCheck, CinemachineVirtualCamera camera)
+        public PhotoScore CalculateScore(BaseAnimalAI animalAI, AnimalState state, CinemachineVirtualCamera camera)
         {
             PhotoScore photoScore = new PhotoScore();
-            if (!IsAnimalInSight(animalAI.transform))
-            {
-                return photoScore;
-            }
             
             if (animalAI == null)
             {
@@ -31,7 +27,7 @@ namespace Game.Scripts
             }
 
             float multiplier;
-            if (animalAI.StateMachine.CurrentState.GetType() == stateForCheck)
+            if (animalAI.StateMachine.CurrentAnimalState == state)
                 multiplier = 1f;
             else
                 multiplier = 0.2f;
@@ -42,20 +38,12 @@ namespace Game.Scripts
             
             var viewportPosition = Camera.main.WorldToViewportPoint(animalAI.transform.position);
             float distanceFromCenter = Vector2.Distance(new Vector2(0.5f, 0.5f), new  Vector2(viewportPosition.x, viewportPosition.y));
-            photoScore.PlacementPoints = Mathf.RoundToInt(Mathf.Clamp(10000f * distanceFromCenter,0.1f, 300f));
+            photoScore.PlacementPoints = Mathf.RoundToInt(Mathf.Clamp(300f * (1f - distanceFromCenter), 0.1f, 300f));
             
             photoScore.TotalScore = photoScore.PosePoints + photoScore.PlacementPoints + photoScore.SizePoints;
             
             Debug.LogWarning($"Pose points: {photoScore.PosePoints}, Size points: {photoScore.SizePoints}, Placement points: {photoScore.PlacementPoints}(distance to center {distanceFromCenter}), Total points {photoScore.TotalScore}");
             return photoScore;
-        }
-        
-        private bool IsAnimalInSight(Transform animal, float tolerancePixels = 200f)
-        {
-            Vector3 screenPoint = Camera.main.WorldToScreenPoint(animal.position);
-            Vector2 center = new Vector2(Screen.width/2, Screen.height/2);
-            float distance = Vector2.Distance(screenPoint, center);
-            return distance < tolerancePixels && screenPoint.z > 0;
         }
     }
 

@@ -12,7 +12,10 @@ namespace Game.Scripts
         private readonly Animator _animator;
         private readonly float _distToFlee;
         private readonly float _radius;
-        private readonly int _maxAttempts = 10; 
+        private readonly int _maxAttempts = 10;
+
+        public AnimalState StateType => AnimalState.Walk;
+
 
         public WalkState(NavMeshAgent agent, GameMath gameMath, Animator animator,float distToFlee, float radius)
         {

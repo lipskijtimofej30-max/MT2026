@@ -1,8 +1,9 @@
 using System;
-using System.Net.NetworkInformation;
+using System.Collections.Generic;
 using System.Threading;
 using Cinemachine;
 using Cysharp.Threading.Tasks;
+using Game.Scripts.Quest;
 using Game.Scripts.Service;
 using UnityEngine;
 using Zenject;
@@ -12,7 +13,6 @@ namespace Game.Scripts.CameraPhoto
     [RequireComponent(typeof(CameraCaptureView))]
     public class CameraCaptureController : MonoBehaviour
     {
-        [SerializeField] private BaseAnimalAI animalAI;
         [SerializeField] private CameraCapture cameraCapture;
         [SerializeField] private float cooldown = 10f;
 
@@ -23,6 +23,7 @@ namespace Game.Scripts.CameraPhoto
         [SerializeField] private float _maxFOV = 90f;
 
         private CameraCaptureView view;
+        private QuestController _questController;
         private PhotoEvaluator photoEvaluator;
         private IPhotoProvider photoProvider;
 
@@ -33,10 +34,11 @@ namespace Game.Scripts.CameraPhoto
         private CancellationTokenSource cts;
 
         [Inject]
-        private void Construct(PhotoEvaluator photoEvaluator, IPhotoProvider photoProvider)
+        private void Construct(PhotoEvaluator photoEvaluator, IPhotoProvider photoProvider, QuestController questController)
         {
             this.photoEvaluator = photoEvaluator;
             this.photoProvider = photoProvider;
+            _questController = questController;
         }
 
         private void Awake()
@@ -94,7 +96,6 @@ namespace Game.Scripts.CameraPhoto
                         }
                         catch (OperationCanceledException)
                         {
-                            // Игнорируем отмену при уничтожении
                         }
                         finally
                         {
@@ -113,16 +114,35 @@ namespace Game.Scripts.CameraPhoto
         }
 
         private async UniTask CaptureAndEvaluateAsync(CancellationToken token)
-        {
-            // Ждём захват скриншота
-            await cameraCapture.Capture().AttachExternalCancellation(token);
+        { 
+            List<BaseAnimalAI> animalsInFrame = await cameraCapture.Capture().AttachExternalCancellation(token);
 
-            // Вычисляем очки
-            var score = photoEvaluator.CalculateScore(animalAI, typeof(WalkState), _camera);
-            Debug.Log($"Score: {score.TotalScore}");
+            if (animalsInFrame != null && animalsInFrame.Count > 0)
+            {
+                BaseAnimalAI bestTarget = animalsInFrame[0];
+                var quest = _questController.CurrentQuest;
+                var score = photoEvaluator.CalculateScore(bestTarget, bestTarget.CurrentState, _camera);
 
-            // Устанавливаем очки в провайдер (фото уже там после Capture)
-            photoProvider.Score = score;
+                if (quest != null)
+                {
+                    if (quest.IsCorrectTarget(bestTarget))
+                    {
+                        Debug.LogWarning($"Квест({quest.name}) выполнен");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Квест({quest.name}) не выполнен");
+                    }
+                }
+        
+                Debug.Log($"Сфоткан: {bestTarget.name}. Score: {score.TotalScore}");
+                photoProvider.Score = score;
+            }
+            else
+            {
+                Debug.Log("На фото никого нет или животные слишком далеко/за препятствием");
+                photoProvider.Score = new PhotoScore();
+            }
         }
 
         private void Zoom()

@@ -1,0 +1,6 @@
+public enum AnimalState
+{
+   Idle,
+   Walk,
+   Flee
+}
