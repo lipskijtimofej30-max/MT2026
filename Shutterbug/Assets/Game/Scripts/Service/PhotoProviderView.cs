@@ -1,5 +1,6 @@
 using System.Collections;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -10,10 +11,10 @@ namespace Game.Scripts.Service
     {
         [SerializeField] private RawImage _image;
         [SerializeField] private CanvasGroup _canvasGroup;
+        [SerializeField] private TMP_Text _scoreText;
 
         [Header("Animation Settings")] 
         [SerializeField] private float _flyDuration = 0.5f;
-
         [SerializeField] private float _displayTime = 2f;
         [SerializeField] private float _fadeOutDuration = 0.4f;
 
@@ -41,24 +42,24 @@ namespace Game.Scripts.Service
             _image.gameObject.SetActive(false);
             _canvasGroup.alpha = 0f;
 
-            _photoProvider.OnPhotoLoaded += RenderImage;
+            _photoProvider.OnPhotoAndScoreReady += RenderImageAndScore;
         }
 
         private void OnDestroy()
         {
-            _photoProvider.OnPhotoLoaded -= RenderImage;
+            _photoProvider.OnPhotoAndScoreReady -= RenderImageAndScore;
             DOTween.Kill(_image.rectTransform);
             DOTween.Kill(_canvasGroup);
         }
 
-        private void RenderImage(Texture2D texture)
+        private void RenderImageAndScore(Texture2D texture, PhotoScore score)
         {
             if (_currentAnimation != null)
                 StopCoroutine(_currentAnimation);
-            _currentAnimation = StartCoroutine(ShowFlashReveal(texture));
+            _currentAnimation = StartCoroutine(ShowFlashReveal(texture, score));
         }
 
-        private IEnumerator ShowFlashReveal(Texture2D texture)
+        private IEnumerator ShowFlashReveal(Texture2D texture, PhotoScore score)
         {
             _image.texture = texture;
             _image.gameObject.SetActive(true);
@@ -66,6 +67,12 @@ namespace Game.Scripts.Service
             _canvasGroup.alpha = 0f;
             
             _playerController.ShakeCamera(0.3f, 1f);
+            
+            if (_scoreText != null)
+            {
+                _scoreText.text = $"Очки: {score.TotalScore}\nПоза: {score.PosePoints}\nРазмер: {score.SizePoints}\nПоложение: {score.PlacementPoints}";
+                _scoreText.gameObject.SetActive(true);
+            }
             
             GameObject flash = new GameObject("Flash", typeof(RectTransform), typeof(Image));
             flash.transform.SetParent(transform, false);
@@ -95,6 +102,7 @@ namespace Game.Scripts.Service
             yield return _canvasGroup.DOFade(0f, _fadeOutDuration).WaitForCompletion();
 
             _image.gameObject.SetActive(false);
+            _scoreText.gameObject.SetActive(false);
             _playerController.ToggleController(true);
             _currentAnimation = null;
         }

@@ -1,6 +1,8 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Game.Scripts.CameraPhoto;
 using Game.Scripts.Service;
+using TMPro.Examples;
 using UnityEngine;
 using Zenject;
 
@@ -17,7 +19,6 @@ public class CameraCapture : MonoBehaviour
     {
         _photoProvider = photoProvider;
     }
-    
 
     public async UniTask Capture()
     {

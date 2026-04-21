@@ -9,6 +9,7 @@ namespace Game.Scripts
         override public void InstallBindings()
         {
             Container.Bind<IPhotoProvider>().To<PhotoProvider>().AsSingle();
+            Container.Bind<PhotoEvaluator>().To<PhotoEvaluator>().AsSingle();
         }
     }
 }

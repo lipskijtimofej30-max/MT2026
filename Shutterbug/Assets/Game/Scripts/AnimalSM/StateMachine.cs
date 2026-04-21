@@ -12,6 +12,8 @@ public class StateMachine : IDisposable
     private IState _currentState;
     private CancellationTokenSource _cts;
     private bool _isRunning;
+    
+    public IState CurrentState => _currentState;
 
     public StateMachine(Dictionary<StateAction, IState> map)
     {
