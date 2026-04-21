@@ -1,4 +1,3 @@
-using System;
 using Game.Scripts.Factory;
 using UnityEngine;
 using Zenject;

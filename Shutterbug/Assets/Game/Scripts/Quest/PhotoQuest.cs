@@ -7,10 +7,14 @@ namespace Game.Scripts.Quest
     {
         [field: SerializeField] public AnimalType AnimalType { get; set; }
         [field: SerializeField] public AnimalState RequiredState { get; set; }
-
+        
+        public bool IsActive = true;
         public bool IsCorrectTarget(BaseAnimalAI animal)
         {
-            return animal.AnimalType == AnimalType && animal.CurrentState == RequiredState;
+            if (!IsActive) return false;
+            bool correct = animal.AnimalType == AnimalType && animal.CurrentState == RequiredState;
+            IsActive = false;
+            return correct;
         }
     }
 }

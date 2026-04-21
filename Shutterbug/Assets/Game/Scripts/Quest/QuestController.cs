@@ -9,5 +9,10 @@ namespace Game.Scripts.Quest
         private int _currentQuestIndex = 0;
         
         public PhotoQuest CurrentQuest => _quests[_currentQuestIndex];
+
+        private void Start()
+        {
+            CurrentQuest.IsActive = true;
+        }
     }
 }

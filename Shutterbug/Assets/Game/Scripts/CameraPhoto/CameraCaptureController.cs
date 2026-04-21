@@ -10,149 +10,92 @@ using Zenject;
 
 namespace Game.Scripts.CameraPhoto
 {
-    [RequireComponent(typeof(CameraCaptureView))]
+    [RequireComponent(typeof(CameraCaptureView))] 
     public class CameraCaptureController : MonoBehaviour
     {
         [SerializeField] private CameraCapture cameraCapture;
-        [SerializeField] private float cooldown = 10f;
+        [SerializeField] private CinemachineVirtualCamera virtualCamera;
 
-        [Header("Zoom settings")] 
-        [SerializeField] private CinemachineVirtualCamera _camera;
-        [SerializeField] private float _zoomSpeed = 10f;
-        [SerializeField] private float _minFOV = 30f;
-        [SerializeField] private float _maxFOV = 90f;
-
-        private CameraCaptureView view;
+        private CameraCaptureView _view;
+        private CameraZoomModule _zoomModule;
+        private CooldownModule _cooldownModule;
+        
+        private PhotoEvaluator _evaluator;
+        private IPhotoProvider _provider;
         private QuestController _questController;
-        private PhotoEvaluator photoEvaluator;
-        private IPhotoProvider photoProvider;
-
-        private float currentCooldown;
-        private bool isUIActive;
-        private bool canCapture;
-        private bool isCapturing;
-        private CancellationTokenSource cts;
 
         [Inject]
-        private void Construct(PhotoEvaluator photoEvaluator, IPhotoProvider photoProvider, QuestController questController)
+        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, QuestController quest)
         {
-            this.photoEvaluator = photoEvaluator;
-            this.photoProvider = photoProvider;
-            _questController = questController;
+            _evaluator = evaluator;
+            _provider = provider;
+            _questController = quest;
         }
 
         private void Awake()
         {
-            view = GetComponent<CameraCaptureView>();
+            _view = GetComponent<CameraCaptureView>();
+            _zoomModule = new CameraZoomModule(virtualCamera);
+            _cooldownModule = new CooldownModule();
+            _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
         }
 
-        private void Start()
+        private void Update()
         {
-            currentCooldown = cooldown;
-            view.UpdateTimerDisplay(currentCooldown);
-            cts = new CancellationTokenSource();
-            RunInputLoopAsync(cts.Token).Forget();
-        }
-        
-        private void OnDestroy()
-        {
-            cts?.Cancel();
-            cts?.Dispose();
+            HandleInput();
         }
 
-        private async UniTaskVoid RunInputLoopAsync(CancellationToken token)
+        private void HandleInput()
         {
-            while (!token.IsCancellationRequested)
+            bool isAiming = Input.GetMouseButton(1);
+            _view.SetUIActive(isAiming);
+
+            if (isAiming)
             {
-                await UniTask.Yield(PlayerLoopTiming.Update, token);
+                _zoomModule.UpdateZoom(Input.GetAxis("Mouse ScrollWheel"));
+                
+                _cooldownModule.Progress(Time.deltaTime);
+                _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
 
-                bool rightMouseHeld = Input.GetMouseButton(1);
-                if (rightMouseHeld != isUIActive)
+                if (_cooldownModule.IsReady && Input.GetKeyDown(KeyCode.E))
                 {
-                    isUIActive = rightMouseHeld;
-                    view.SetUIActive(isUIActive);
+                    ExecuteCapture().Forget();
                 }
-
-                if (isUIActive)
-                {
-                    Zoom();
-
-                    if (currentCooldown > 0f)
-                    {
-                        currentCooldown -= Time.deltaTime;
-                        if (currentCooldown <= 0f)
-                            canCapture = true;
-                        view.UpdateTimerDisplay(currentCooldown);
-                    }
-
-                    if (canCapture && !isCapturing && Input.GetKeyDown(KeyCode.E))
-                    {
-                        canCapture = false;
-                        isCapturing = true;
-
-                        try
-                        {
-                            await CaptureAndEvaluateAsync(token);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                        }
-                        finally
-                        {
-                            currentCooldown = cooldown;
-                            view.UpdateTimerDisplay(currentCooldown);
-                            isCapturing = false;
-                        }
-                    }
-                }
-                else
-                {
-                    canCapture = false;
-                    _camera.m_Lens.FieldOfView = Mathf.Lerp(_camera.m_Lens.FieldOfView, 60f, 0.4f);
-                }
-            }
-        }
-
-        private async UniTask CaptureAndEvaluateAsync(CancellationToken token)
-        { 
-            List<BaseAnimalAI> animalsInFrame = await cameraCapture.Capture().AttachExternalCancellation(token);
-
-            if (animalsInFrame != null && animalsInFrame.Count > 0)
-            {
-                BaseAnimalAI bestTarget = animalsInFrame[0];
-                var quest = _questController.CurrentQuest;
-                var score = photoEvaluator.CalculateScore(bestTarget, bestTarget.CurrentState, _camera);
-
-                if (quest != null)
-                {
-                    if (quest.IsCorrectTarget(bestTarget))
-                    {
-                        Debug.LogWarning($"Квест({quest.name}) выполнен");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Квест({quest.name}) не выполнен");
-                    }
-                }
-        
-                Debug.Log($"Сфоткан: {bestTarget.name}. Score: {score.TotalScore}");
-                photoProvider.Score = score;
             }
             else
             {
-                Debug.Log("На фото никого нет или животные слишком далеко/за препятствием");
-                photoProvider.Score = new PhotoScore();
+                _zoomModule.ResetZoom();
             }
         }
 
-        private void Zoom()
+        private async UniTaskVoid ExecuteCapture()
         {
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (scroll != 0)
+            // 1. Захват
+            var targets = await cameraCapture.Capture();
+            
+            // 2. Обработка (Логика оценки)
+            ProcessResults(targets);
+
+            // 3. Сброс кулдауна
+            _cooldownModule.Reset(5f);
+        }
+
+        private void ProcessResults(List<BaseAnimalAI> targets)
+        {
+            if (targets != null && targets.Count > 0)
             {
-                float newFOV = _camera.m_Lens.FieldOfView - scroll * _zoomSpeed;
-                newFOV = Mathf.Clamp(newFOV, _minFOV, _maxFOV);
-                _camera.m_Lens.FieldOfView = newFOV;
+                var bestTarget = targets[0];
+                var score = _evaluator.CalculateScore(bestTarget, bestTarget.CurrentState, virtualCamera);
+                
+                if (_questController.CurrentQuest.IsCorrectTarget(bestTarget))
+                    Debug.LogWarning("Quest Success!");
+
+                Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState};");
+                _provider.Score = score;
+            }
+            else
+            {
+                _provider.Score = new PhotoScore();
             }
         }
     }

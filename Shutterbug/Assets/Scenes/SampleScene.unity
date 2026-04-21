@@ -1489,13 +1489,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f63ee177ef440279bb594c85619ec60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animalAI: {fileID: 0}
   cameraCapture: {fileID: 283386172}
-  cooldown: 4
-  _camera: {fileID: 250697375}
-  _zoomSpeed: 10
-  _minFOV: 30
-  _maxFOV: 75
+  virtualCamera: {fileID: 250697375}
 --- !u!1 &1297326913
 GameObject:
   m_ObjectHideFlags: 0

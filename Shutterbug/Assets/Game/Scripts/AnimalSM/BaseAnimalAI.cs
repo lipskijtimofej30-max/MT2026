@@ -7,6 +7,6 @@ namespace Game.Scripts
         protected StateMachine _stateMachine;
         public StateMachine StateMachine => _stateMachine;
         public AnimalType AnimalType { get; set; }
-        public AnimalState CurrentState { get; set; }
+        public AnimalState CurrentState => _stateMachine.CurrentAnimalState;
     }
 }

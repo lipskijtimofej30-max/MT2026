@@ -44,7 +44,7 @@ public class CameraCapture : MonoBehaviour
         RenderTexture.active = null;
         Destroy(rt);
         
-        await UniTask.Delay(TimeSpan.FromSeconds(2));
+        await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
         _photoProvider.Photo = screenshot;
 
         return GetAnimalInFrame();

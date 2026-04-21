@@ -7,7 +7,7 @@ using Zenject;
 
 namespace Game.Scripts
 {
-    public class RabbitAI : BaseAnimalAI, IPhotoTarget
+    public class RabbitAI : BaseAnimalAI
     {
         [SerializeField] private NavMeshAgent _agent;
         [SerializeField] private Animator _animator;
@@ -41,7 +41,6 @@ namespace Game.Scripts
             
             _stateMachine = new StateMachine(map);
             AnimalType = AnimalType.Rabbit;
-            CurrentState = _stateMachine.CurrentAnimalState;
             await StateMachine.Start(_idleState);
         }
     }
