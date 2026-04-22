@@ -39,7 +39,6 @@ namespace Game.Scripts.Quest
         public void AcceptQuest(PhotoQuest quest)
         {
             _activeQuest = quest;
-            _activeQuest.IsActive = true;
             Debug.LogWarning($"Текущий квест {_activeQuest.name}");
             _availableInJournal.Remove(quest);
         }
@@ -47,7 +46,6 @@ namespace Game.Scripts.Quest
         public void CompleteActiveQuest()
         {
             Debug.LogWarning($"Квест {_activeQuest.name} выполнен!!");
-            _activeQuest.IsActive = false;
             _activeQuest = null;
         }
         

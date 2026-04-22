@@ -1,9 +1,7 @@
 using System;
-using Game.Scripts.Service;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
 
 namespace Game.Scripts.Quest
 {
@@ -13,14 +11,23 @@ namespace Game.Scripts.Quest
         [SerializeField] private Button _selectButton;
 
         private PhotoQuest _quest;
+        private Image _image;
         private Action<PhotoQuest> _onSelected;
 
-        public void Setup(PhotoQuest quest, Action<PhotoQuest> onSelected)
+        private void Awake()
+        {
+            _image = gameObject.GetComponentInChildren<Image>();
+        }
+
+        public void Setup(PhotoQuest quest, Action<PhotoQuest> onSelected, bool isActive = false)
         {
             _quest = quest;
             _onSelected = onSelected;
             _titleText.text = quest.Description.ShortTitle;
-            
+            if (isActive)
+            {
+                _image.color = Color.yellow;
+            }
             _selectButton.onClick.RemoveAllListeners();
             _selectButton.onClick.AddListener(HandleClick);
         }

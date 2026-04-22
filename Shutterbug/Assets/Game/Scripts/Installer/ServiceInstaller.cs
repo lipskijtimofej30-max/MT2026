@@ -23,7 +23,7 @@ namespace Game.Scripts
         private void BindQuestService()
         {
             Container.Bind<QuestDatabase>().FromInstance(_questDatabase).AsSingle();
-            Container.Bind<QuestService>().To<QuestService>().AsSingle();
+            Container.BindInterfacesAndSelfTo<QuestService>().AsSingle();
         }
 
         private void BindProgressionService()

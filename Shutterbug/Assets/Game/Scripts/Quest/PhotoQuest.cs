@@ -10,11 +10,8 @@ namespace Game.Scripts.Quest
         [field: SerializeField] public AnimalState RequiredState { get; set; }
         [field: SerializeField] public Description Description { get; set; }
         
-        public bool IsActive = true;
-        
         public bool IsCorrectTarget(BaseAnimalAI animal)
         {
-            if (!IsActive) return false;
             bool correct = animal.AnimalType == AnimalType && animal.CurrentState == RequiredState;
             return correct;
         }
