@@ -1,15 +1,18 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
 namespace Game.Scripts.Quest
 {
-    public class QuestService
+    public class QuestService : IInitializable
     {
-        private List<PhotoQuest> _quests = new List<PhotoQuest>();
         private QuestDatabase _questDatabase;
+        private Queue<PhotoQuest> _pool = new();
+        private List<PhotoQuest> _availableInJournal = new();
         private PhotoQuest _activeQuest;
-        public IReadOnlyList<PhotoQuest> Quests => _quests;
+        
+        public IReadOnlyList<PhotoQuest> AvailableInJournal => _availableInJournal;
         public PhotoQuest CurrentQuest => _activeQuest;
 
         [Inject]
@@ -17,11 +20,20 @@ namespace Game.Scripts.Quest
         {
             _questDatabase = questDatabase;
         }
-        
-        private void Start()
+        public void Initialize()
         {
-            _activeQuest.IsActive = true;
-            _quests = _questDatabase.Databased;
+            var shuffled = _questDatabase.Databased.OrderBy(x => Random.value).ToList();
+            foreach(var quest in shuffled) _pool.Enqueue(quest);
+
+            RefreshAvailableQuests();
+        }
+
+        private void RefreshAvailableQuests()
+        {
+            while (_availableInJournal.Count < 3 && _pool.Count > 0)
+            {
+                _availableInJournal.Add(_pool.Dequeue());
+            }
         }
         
         public void AcceptQuest(PhotoQuest quest)
@@ -29,7 +41,7 @@ namespace Game.Scripts.Quest
             _activeQuest = quest;
             _activeQuest.IsActive = true;
             Debug.LogWarning($"Текущий квест {_activeQuest.name}");
-            _quests.Remove(quest);
+            _availableInJournal.Remove(quest);
         }
         
         public void CompleteActiveQuest()
@@ -38,5 +50,6 @@ namespace Game.Scripts.Quest
             _activeQuest.IsActive = false;
             _activeQuest = null;
         }
+        
     }
 }

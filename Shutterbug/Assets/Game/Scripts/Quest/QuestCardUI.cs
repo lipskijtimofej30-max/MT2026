@@ -1,4 +1,6 @@
+using System;
 using Game.Scripts.Service;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -7,83 +9,25 @@ namespace Game.Scripts.Quest
 {
     public class QuestCardUI : MonoBehaviour
     {
-        [SerializeField] private PhotoQuest _activeQuest;
-        [SerializeField] private Transform _container;
-        [SerializeField] private Button _questCompleteButton;
-        [SerializeField] private Button _questAcceptButton;
+        [SerializeField] private TMP_Text _titleText;
+        [SerializeField] private Button _selectButton;
 
-        private int _countOpen = 0;
-        private IAnimalInPhotoProvider _animalInPhotoProvider;
-        private QuestService _questService;
-        private PlayerController _playerController;
+        private PhotoQuest _quest;
+        private Action<PhotoQuest> _onSelected;
 
-        [Inject]
-        private void Construct(IAnimalInPhotoProvider animalInPhotoProvider, QuestService questService, PlayerController playerController)
+        public void Setup(PhotoQuest quest, Action<PhotoQuest> onSelected)
         {
-            _animalInPhotoProvider = animalInPhotoProvider;
-            _questService = questService;
-            _playerController = playerController;
-        }
-
-        private void Start()
-        {
-            Hide();
-            _questAcceptButton.onClick.AddListener(() => _questService.AcceptQuest(_activeQuest));
-            _questCompleteButton.onClick.AddListener(() => IsQuestComplete());
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                _countOpen++;
-                if (_countOpen % 2 == 1)
-                    Show();
-                else
-                    Hide();
-            }
-        }
-
-        private void IsQuestComplete()
-        {
-            var animal = _animalInPhotoProvider.TargetAnimal;
-            var quest = _questService.CurrentQuest;
-            Debug.LogWarning($"Текущее животное {animal.name}; is correct quest {quest.IsCorrectTarget(animal)}");
-            if (animal != null && quest !=null && quest.IsCorrectTarget(animal))
-            {
-                _questService.CompleteActiveQuest();
-            }
+            _quest = quest;
+            _onSelected = onSelected;
+            _titleText.text = quest.Description.ShortTitle;
+            
+            _selectButton.onClick.RemoveAllListeners();
+            _selectButton.onClick.AddListener(HandleClick);
         }
         
-        private void Show()
-        {
-            _container.gameObject.SetActive(true);
-            _playerController.ToggleController(false);
-            Cursor.lockState = CursorLockMode.None; // Не забывай про курсор!
-            Cursor.visible = true;
-    
-            UpdateUI(); // Обновляем тексты и кнопки при открытии
-        }
-
-        private void UpdateUI()
-        {
-            var currentQuest = _questService.CurrentQuest;
-            bool hasActive = currentQuest != null;
-
-            _questAcceptButton.gameObject.SetActive(!hasActive);
-            _questCompleteButton.gameObject.SetActive(hasActive);
-
-            if (hasActive)
-            {
-                var lastAnimal = _animalInPhotoProvider.TargetAnimal;
-                _questCompleteButton.interactable = currentQuest.IsCorrectTarget(lastAnimal);
-            }
-        }   
-
-        private void Hide()
-        {
-            _container.gameObject.SetActive(false);
-            _playerController.ToggleController(true);
+        private void HandleClick()
+        {   
+            _onSelected?.Invoke(_quest);
         }
     }
 }

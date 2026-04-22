@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Game.Scripts.Quest
@@ -7,6 +8,7 @@ namespace Game.Scripts.Quest
     {
         [field: SerializeField] public AnimalType AnimalType { get; set; }
         [field: SerializeField] public AnimalState RequiredState { get; set; }
+        [field: SerializeField] public Description Description { get; set; }
         
         public bool IsActive = true;
         
@@ -16,5 +18,12 @@ namespace Game.Scripts.Quest
             bool correct = animal.AnimalType == AnimalType && animal.CurrentState == RequiredState;
             return correct;
         }
+    }
+
+    [Serializable]
+    public struct Description
+    {
+        public string ShortTitle;
+        public string FullDescription;
     }
 }
