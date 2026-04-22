@@ -1,3 +1,4 @@
+using System;
 using Cinemachine;
 using DG.Tweening;
 using UnityEngine;
@@ -36,7 +37,6 @@ namespace Game.Scripts
 
         private void Awake()
         {
-            Cursor.lockState = CursorLockMode.Locked;
             controller = GetComponent<CharacterController>();
             currentSpeed = moveSpeed;
             
@@ -55,6 +55,16 @@ namespace Game.Scripts
             {
                 Debug.LogError("Cinemachine Virtual Camera is not assigned in the inspector!");
             }
+        }
+
+        private void OnEnable()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        private void OnDisable()
+        {
+            Cursor.lockState = CursorLockMode.Confined;
         }
 
         private void Update()

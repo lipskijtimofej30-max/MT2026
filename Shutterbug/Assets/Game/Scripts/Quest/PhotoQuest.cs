@@ -2,18 +2,18 @@ using UnityEngine;
 
 namespace Game.Scripts.Quest
 {
-    [CreateAssetMenu(fileName = "Photo Quest", menuName = "Game/Quest/Photo Quest", order = 0)]
+    [CreateAssetMenu(fileName = "Photo Quest", menuName = "Game/Quests/Photo Quest", order = 0)]
     public class PhotoQuest : ScriptableObject
     {
         [field: SerializeField] public AnimalType AnimalType { get; set; }
         [field: SerializeField] public AnimalState RequiredState { get; set; }
         
         public bool IsActive = true;
+        
         public bool IsCorrectTarget(BaseAnimalAI animal)
         {
             if (!IsActive) return false;
             bool correct = animal.AnimalType == AnimalType && animal.CurrentState == RequiredState;
-            IsActive = false;
             return correct;
         }
     }

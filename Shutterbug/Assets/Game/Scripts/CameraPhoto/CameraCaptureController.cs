@@ -21,14 +21,14 @@ namespace Game.Scripts.CameraPhoto
         private PhotoEvaluator _evaluator;
         private IProgressionService _progressionService;
         private IPhotoProvider _provider;
-        private QuestController _questController;
+        private QuestService _questService;
 
         [Inject]
-        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, QuestController quest, IProgressionService progressionService)
+        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, QuestService quest, IProgressionService progressionService)
         {
             _evaluator = evaluator;
             _provider = provider;
-            _questController = quest;
+            _questService = quest;
             _progressionService = progressionService;
         }
 
@@ -85,7 +85,7 @@ namespace Game.Scripts.CameraPhoto
                 var bestTarget = targets[0];
                 var score = _evaluator.CalculateScore(bestTarget, bestTarget.CurrentState, virtualCamera);
                 
-                if (_questController.CurrentQuest.IsCorrectTarget(bestTarget))
+                if (_questService.CurrentQuest.IsCorrectTarget(bestTarget))
                     Debug.LogWarning("Quest Success!");
 
                 Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState};");
