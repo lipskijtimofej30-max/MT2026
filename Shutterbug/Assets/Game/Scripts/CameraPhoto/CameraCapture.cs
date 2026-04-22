@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Game.Scripts;
-using Game.Scripts.CameraPhoto;
 using Game.Scripts.Factory;
 using Game.Scripts.Service;
-using TMPro.Examples;
 using UnityEngine;
 using Zenject;
 
@@ -20,12 +18,14 @@ public class CameraCapture : MonoBehaviour
 
     private IPhotoProvider _photoProvider;
     private AnimalRegistry _animalRegistry;
+    private IProgressionService _progressionService;
 
     [Inject]
-    private void Construct(IPhotoProvider photoProvider, AnimalRegistry animalRegistry)
+    private void Construct(IPhotoProvider photoProvider, AnimalRegistry animalRegistry, IProgressionService progressionService)
     {
         _photoProvider = photoProvider;
         _animalRegistry = animalRegistry;
+        _progressionService = progressionService;
     }
 
     public async UniTask<List<BaseAnimalAI>> Capture()
@@ -76,7 +76,7 @@ public class CameraCapture : MonoBehaviour
     private bool CheckLineOfSight(Camera camera, BaseAnimalAI animal)
     {
         Ray ray = new Ray(camera.transform.position, animal.transform.position - camera.transform.position);
-        if (Physics.SphereCast(ray, 4f, out RaycastHit hit, 45f))
+        if (Physics.SphereCast(ray, 4f, out RaycastHit hit, _progressionService.CurrentLevelData.captureDistance))
         {
             return hit.collider.gameObject == animal.gameObject;
         }

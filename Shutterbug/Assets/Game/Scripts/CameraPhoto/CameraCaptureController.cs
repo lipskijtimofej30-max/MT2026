@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Threading;
 using Cinemachine;
 using Cysharp.Threading.Tasks;
 using Game.Scripts.Quest;
@@ -21,22 +19,24 @@ namespace Game.Scripts.CameraPhoto
         private CooldownModule _cooldownModule;
         
         private PhotoEvaluator _evaluator;
+        private IProgressionService _progressionService;
         private IPhotoProvider _provider;
         private QuestController _questController;
 
         [Inject]
-        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, QuestController quest)
+        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, QuestController quest, IProgressionService progressionService)
         {
             _evaluator = evaluator;
             _provider = provider;
             _questController = quest;
+            _progressionService = progressionService;
         }
 
         private void Awake()
         {
             _view = GetComponent<CameraCaptureView>();
-            _zoomModule = new CameraZoomModule(virtualCamera);
-            _cooldownModule = new CooldownModule();
+            _zoomModule = new CameraZoomModule(virtualCamera, _progressionService);
+            _cooldownModule = new CooldownModule(_progressionService);
             _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
         }
 
@@ -70,14 +70,12 @@ namespace Game.Scripts.CameraPhoto
 
         private async UniTaskVoid ExecuteCapture()
         {
-            // 1. Захват
             var targets = await cameraCapture.Capture();
             
-            // 2. Обработка (Логика оценки)
             ProcessResults(targets);
 
             // 3. Сброс кулдауна
-            _cooldownModule.Reset(5f);
+            _cooldownModule.Reset();
         }
 
         private void ProcessResults(List<BaseAnimalAI> targets)
