@@ -28,12 +28,13 @@ namespace Game.Scripts.Quest
         {
             _activeQuest = quest;
             _activeQuest.IsActive = true;
+            Debug.LogWarning($"Текущий квест {_activeQuest.name}");
             _quests.Remove(quest);
         }
         
         public void CompleteActiveQuest()
         {
-            Debug.Log($"Квест {_activeQuest.name} выполнен!!");
+            Debug.LogWarning($"Квест {_activeQuest.name} выполнен!!");
             _activeQuest.IsActive = false;
             _activeQuest = null;
         }

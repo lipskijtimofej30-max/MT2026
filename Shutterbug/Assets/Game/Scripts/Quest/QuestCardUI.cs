@@ -29,6 +29,7 @@ namespace Game.Scripts.Quest
         {
             Hide();
             _questAcceptButton.onClick.AddListener(() => _questService.AcceptQuest(_activeQuest));
+            _questCompleteButton.onClick.AddListener(() => IsQuestComplete());
         }
 
         private void Update()
@@ -47,6 +48,7 @@ namespace Game.Scripts.Quest
         {
             var animal = _animalInPhotoProvider.TargetAnimal;
             var quest = _questService.CurrentQuest;
+            Debug.LogWarning($"Текущее животное {animal.name}; is correct quest {quest.IsCorrectTarget(animal)}");
             if (animal != null && quest !=null && quest.IsCorrectTarget(animal))
             {
                 _questService.CompleteActiveQuest();
@@ -57,7 +59,26 @@ namespace Game.Scripts.Quest
         {
             _container.gameObject.SetActive(true);
             _playerController.ToggleController(false);
+            Cursor.lockState = CursorLockMode.None; // Не забывай про курсор!
+            Cursor.visible = true;
+    
+            UpdateUI(); // Обновляем тексты и кнопки при открытии
         }
+
+        private void UpdateUI()
+        {
+            var currentQuest = _questService.CurrentQuest;
+            bool hasActive = currentQuest != null;
+
+            _questAcceptButton.gameObject.SetActive(!hasActive);
+            _questCompleteButton.gameObject.SetActive(hasActive);
+
+            if (hasActive)
+            {
+                var lastAnimal = _animalInPhotoProvider.TargetAnimal;
+                _questCompleteButton.interactable = currentQuest.IsCorrectTarget(lastAnimal);
+            }
+        }   
 
         private void Hide()
         {
