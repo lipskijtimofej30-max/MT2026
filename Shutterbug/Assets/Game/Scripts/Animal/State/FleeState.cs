@@ -1,7 +1,10 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Scripts.Module;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace Game.Scripts
 {
@@ -9,19 +12,19 @@ namespace Game.Scripts
     {
         private readonly NavMeshAgent _agent;
         private readonly GameMath _gameMath;
-        private readonly Animator _animator;
-        private readonly float _safeDistance;
+        private readonly RabbitAnimatorModule _animatorModule;
+        private readonly Func<bool> _conditionMet;
         private readonly float _fleeDistance = 8f;
         private readonly int _maxAttempts = 10;
         
         public AnimalState StateType => AnimalState.Flee;
         
-        public FleeState(NavMeshAgent agent, GameMath gameMath, Animator animator, float safeDistance)
+        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule, Func<bool> conditionMet)
         {
             _agent = agent;
             _gameMath = gameMath;
-            _animator = animator;
-            _safeDistance = safeDistance;
+            _animatorModule = animatorModule;
+            _conditionMet = conditionMet;
         }
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
@@ -39,16 +42,15 @@ namespace Game.Scripts
 
             _agent.speed = 7f;
             
-            _animator.SetInteger("AnimIndex", 1);
-            _animator.SetTrigger("Next");
+            _animatorModule.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
             
             _agent.SetDestination(target);
-            if (_gameMath.DistanceToPlayer(_agent.transform) < _safeDistance)
+            if (_conditionMet())
                 return StateAction.Stay;
 
             while (!ct.IsCancellationRequested)
             {
-                if (_gameMath.DistanceToPlayer(_agent.transform) > _safeDistance)
+                if (!_conditionMet())
                     return StateAction.GoToIdle;
 
                 await UniTask.Yield(ct);

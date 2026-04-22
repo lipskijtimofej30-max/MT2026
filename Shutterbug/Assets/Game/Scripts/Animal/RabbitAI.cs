@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
+using Game.Scripts.Module;
 using UnityEngine;
 using UnityEngine.AI;
 using Zenject;
@@ -14,6 +14,7 @@ namespace Game.Scripts
         [SerializeField] private float _distanceToFlee = 15f;
         private GameMath _gameMath;
         
+        private RabbitAnimatorModule _animatorModule;
         private IdleState _idleState;
         private WalkState _walkState;
         private FleeState _fleeState;
@@ -26,22 +27,36 @@ namespace Game.Scripts
         
         private async UniTaskVoid Start()
         {
-
             Debug.Log($"Distance to flee: {_distanceToFlee}");
-            _idleState = new IdleState(_gameMath,_agent, _animator, _distanceToFlee,0.3f, 1f);
-            _walkState = new WalkState(_agent, _gameMath, _animator, _distanceToFlee, 5f);
-            _fleeState = new FleeState(_agent, _gameMath, _animator, _distanceToFlee);
+            _animatorModule = new RabbitAnimatorModule(_animator);
+            
+            _idleState = new IdleState(_animatorModule, SpecialTransitionMethod,0.3f, 1f);
+            _walkState = new WalkState(_agent, _gameMath, _animatorModule, SpecialTransitionMethod, 5f);
+            _fleeState = new FleeState(_agent, _gameMath, _animatorModule, SpecialTransitionMethod);
 
             Dictionary<StateAction, IState> map = new Dictionary<StateAction, IState>
             {
                 { StateAction.GoToIdle, _idleState },
                 { StateAction.GoToWalk, _walkState },
-                { StateAction.GoToFlee, _fleeState },
+                { StateAction.GoToSpecialState, _fleeState },
             };
             
             _stateMachine = new StateMachine(map);
             AnimalType = AnimalType.Rabbit;
-            await StateMachine.Start(_idleState);
+            await StateMachine.Start(_idleState).AttachExternalCancellation(destroyCancellationToken);
+        }
+
+        private bool SpecialTransitionMethod()
+        {
+            if (_gameMath.DistanceToPlayer(_agent.transform) < _distanceToFlee)
+                return true;
+            else
+                return false;
+        }
+
+        private void OnDestroy()
+        {
+            _stateMachine?.Dispose();
         }
     }
 }

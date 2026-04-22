@@ -1,7 +1,10 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Scripts.Module;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 namespace Game.Scripts
 {
@@ -9,29 +12,29 @@ namespace Game.Scripts
     {
         private readonly NavMeshAgent _agent;
         private readonly GameMath _gameMath;
-        private readonly Animator _animator;
-        private readonly float _distToFlee;
+        private readonly RabbitAnimatorModule _animator;
+        private readonly Func<bool> _conditionMet;
         private readonly float _radius;
         private readonly int _maxAttempts = 10;
 
         public AnimalState StateType => AnimalState.Walk;
 
 
-        public WalkState(NavMeshAgent agent, GameMath gameMath, Animator animator,float distToFlee, float radius)
+        public WalkState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animator,Func<bool> conditionMet, float radius)
         {
             _agent = agent;
             _gameMath = gameMath;
             _animator = animator;
-            _distToFlee = distToFlee;
+            _conditionMet = conditionMet;
             _radius = radius;
         }
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
-            if (_gameMath.DistanceToPlayer(_agent.transform) < _distToFlee)
+            if (_conditionMet())
             {
                 Debug.Log("[WalkState] Player inside flee radius immediately, fleeing.");
-                return StateAction.GoToFlee;
+                return StateAction.GoToSpecialState;
             }
             
             _agent.speed = 3.5f;
@@ -41,8 +44,7 @@ namespace Game.Scripts
                 return StateAction.GoToIdle;
             }
 
-            _animator.SetInteger("AnimIndex", 1);
-            _animator.SetTrigger("Next");
+            _animator.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
             
             _agent.SetDestination(target);
 
@@ -51,10 +53,10 @@ namespace Game.Scripts
 
             while (!ct.IsCancellationRequested && _agent != null && _agent.pathPending == false && _agent.remainingDistance > 0.1f)
             {
-                if (_gameMath.DistanceToPlayer(_agent.transform) < _distToFlee)
+                if (_conditionMet())
                 {
                     Debug.Log($"[WalkState] Player entered flee radius while walking, fleeing!");
-                    return StateAction.GoToFlee;
+                    return StateAction.GoToSpecialState;
                 }
                 
                 if (Vector3.Distance(_agent.transform.position, lastPos) < 0.01f)

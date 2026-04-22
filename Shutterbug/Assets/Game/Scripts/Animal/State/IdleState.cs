@@ -1,27 +1,23 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.AI;
+using Game.Scripts.Module;
 using Random = UnityEngine.Random;
 
 namespace Game.Scripts
 {
     public class IdleState : IState
     {
-        private float _minTimeIdle, _maxTimeIdle, _distToFlee;
-        private GameMath _gameMath;
-        private NavMeshAgent _agent;
-        private Animator _animator;
+        private float _minTimeIdle, _maxTimeIdle;
+        private RabbitAnimatorModule _animatorModule;
+        private Func<bool> _conditionMet;
         public AnimalState StateType => AnimalState.Idle;
 
 
-        public IdleState(GameMath gameMath,NavMeshAgent agent,Animator animator, float distToFlee, float minTime, float maxTime)
+        public IdleState(RabbitAnimatorModule animatorModule, Func<bool> conditionMetToSpecialState,float minTime, float maxTime)
         {
-            _gameMath = gameMath;
-            _agent = agent;
-            _animator = animator;
-            _distToFlee = distToFlee;
+            _animatorModule = animatorModule;
+            _conditionMet = conditionMetToSpecialState;
             _minTimeIdle = minTime;
             _maxTimeIdle = maxTime;
         }
@@ -31,13 +27,11 @@ namespace Game.Scripts
             float elapsed = 0f;
             float duration = Random.Range(_minTimeIdle, _maxTimeIdle);
             
-            _animator.SetInteger("AnimIndex", 0);
-            _animator.SetTrigger("Next");
-            
+            _animatorModule.StartAnimation(RabbitAnimatorModule.IDLE);
             while (elapsed < duration)
             {
-                if (_gameMath.DistanceToPlayer(_agent.transform) < _distToFlee)
-                    return StateAction.GoToFlee;
+                if (_conditionMet())
+                    return StateAction.GoToSpecialState;
 
                 await UniTask.Delay(100, cancellationToken: ct); 
                 elapsed += 0.1f;
