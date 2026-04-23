@@ -31,7 +31,6 @@ namespace Game.Scripts
         {
             Vector3 fleeDir = _gameMath.GetDirectionToPlayer(_agent.transform);
             Vector3 desiredPos = _agent.transform.position + fleeDir * _fleeDistance;
-            
             Vector3 target = GetNavMeshPoint(desiredPos);
             
             if (target == Vector3.zero)
@@ -41,21 +40,25 @@ namespace Game.Scripts
             }
 
             _agent.speed = 7f;
-            
-            _animatorModule.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
-            
             _agent.SetDestination(target);
+            
             if (_conditionMet())
                 return StateAction.Stay;
-
-            while (!ct.IsCancellationRequested)
+            
+            if (_agent.remainingDistance > 0.1f)
             {
-                if (!_conditionMet())
-                    return StateAction.GoToIdle;
+                _animatorModule.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
 
                 await UniTask.Yield(ct);
             }
-            
+           
+            while (!ct.IsCancellationRequested && _agent.isActiveAndEnabled)
+            {
+                if (!_conditionMet())
+                    return StateAction.GoToWalk;
+                
+                await UniTask.Yield(ct);
+            }
             return StateAction.Stay;
         }
 

@@ -54,19 +54,23 @@ public class CameraCapture : MonoBehaviour
     {
         List<BaseAnimalAI> result = new List<BaseAnimalAI>();
         var allAnimals = _animalRegistry.Animals;
+
         foreach (var animal in allAnimals)
         {
             if (animal == null) continue;
-            
+        
             var pos = targetCamera.WorldToViewportPoint(animal.transform.position);
-            bool isInFrustum = pos.z > 0 && pos.x > 0 && pos.x < 1 && pos.y >0 && pos.y < 1;
+            bool isInFrustum = pos.z > 0 && pos.x > 0 && pos.x < 1 && pos.y > 0 && pos.y < 1;
+        
             if (isInFrustum)
             {
-                float distance = Vector3.Distance(targetCamera.transform.position, animal.transform.position);
-                if (distance > 50f) continue;
                 if (CheckLineOfSight(targetCamera, animal))
                 {
                     result.Add(animal);
+                }
+                else
+                {
+                    Debug.LogWarning($"Animal {animal.name} FAILED line of sight");
                 }
             }
         }
@@ -75,10 +79,21 @@ public class CameraCapture : MonoBehaviour
 
     private bool CheckLineOfSight(Camera camera, BaseAnimalAI animal)
     {
-        Ray ray = new Ray(camera.transform.position, animal.transform.position - camera.transform.position);
-        if (Physics.SphereCast(ray, 4f, out RaycastHit hit, _progressionService.CurrentLevelData.captureDistance))
+        Vector3 direction = animal.transform.position - camera.transform.position;
+        float distance = direction.magnitude;
+    
+        if (distance > _progressionService.CurrentLevelData.captureDistance)
+            return false;
+        
+        Vector3 targetPoint = animal.transform.position + Vector3.up * 0.5f; 
+        Vector3 rayDirection = targetPoint - camera.transform.position;
+
+        if (Physics.SphereCast(camera.transform.position, 0.5f ,rayDirection, out RaycastHit hit, distance + 1f))
         {
-            return hit.collider.gameObject == animal.gameObject;
+            if (hit.collider.transform.root == animal.transform.root)
+                return true;
+            else
+                Debug.LogWarning($"View blocked by: {hit.collider.name}");
         }
         return false;
     }

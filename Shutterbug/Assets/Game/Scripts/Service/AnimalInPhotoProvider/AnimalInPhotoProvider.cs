@@ -4,18 +4,18 @@ namespace Game.Scripts.Service
 {
     public class AnimalInPhotoProvider : IAnimalInPhotoProvider
     {
-        private BaseAnimalAI _bestTarget;
+        private CapturedPhotoData _bestTarget;
 
-        public BaseAnimalAI TargetAnimal
+        public CapturedPhotoData LastPhotoData
         {
             get => _bestTarget;
             set
             {
                 _bestTarget = value;
-                OnTargetAnimalChanged?.Invoke(_bestTarget);
+                OnCaptureDataChanged?.Invoke(_bestTarget);
             }
         }
 
-        public event Action<BaseAnimalAI> OnTargetAnimalChanged;
+        public event Action<CapturedPhotoData> OnCaptureDataChanged;
     }
 }

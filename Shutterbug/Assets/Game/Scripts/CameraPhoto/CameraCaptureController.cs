@@ -25,13 +25,13 @@ namespace Game.Scripts.CameraPhoto
         private QuestService _questService;
 
         [Inject]
-        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, QuestService quest, IProgressionService progressionService, IAnimalInPhotoProvider animalInPhotoProvider)
+        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, IProgressionService progressionService, IAnimalInPhotoProvider animalInPhotoProvider,  QuestService questService)
         {
             _evaluator = evaluator;
             _provider = provider;
-            _questService = quest;
             _progressionService = progressionService;
             _animalInPhotoProvider = animalInPhotoProvider;
+            _questService = questService;
         }
 
         private void Awake()
@@ -40,6 +40,7 @@ namespace Game.Scripts.CameraPhoto
             _zoomModule = new CameraZoomModule(virtualCamera, _progressionService);
             _cooldownModule = new CooldownModule(_progressionService);
             _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
+            _cooldownModule.Reset();
         }
 
         private void Update()
@@ -76,7 +77,6 @@ namespace Game.Scripts.CameraPhoto
             
             ProcessResults(targets);
 
-            // 3. Сброс кулдауна
             _cooldownModule.Reset();
         }
 
@@ -85,9 +85,13 @@ namespace Game.Scripts.CameraPhoto
             if (targets != null && targets.Count > 0)
             {
                 var bestTarget = targets[0];
-                var score = _evaluator.CalculateScore(bestTarget, bestTarget.CurrentState, virtualCamera);
-                _animalInPhotoProvider.TargetAnimal = bestTarget;
-                Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState};");
+                var score = _evaluator.CalculateScore(bestTarget, _questService.CurrentQuest.RequiredState, virtualCamera);
+                _animalInPhotoProvider.LastPhotoData = new CapturedPhotoData
+                {
+                    AnimalType =  bestTarget.AnimalType,
+                    AnimalState = bestTarget.CurrentState,
+                };
+                Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState}; Distance to animal {Vector3.Distance(bestTarget.transform.position, virtualCamera.transform.position)} ");
                 _provider.Score = score;
             }
             else

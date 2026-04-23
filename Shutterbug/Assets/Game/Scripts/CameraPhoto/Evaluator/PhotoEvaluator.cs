@@ -1,4 +1,3 @@
-using System;
 using Cinemachine;
 using UnityEngine;
 
@@ -25,6 +24,8 @@ namespace Game.Scripts
                 Debug.LogWarning("CalculateScore: CurrentState равен null, возвращается нулевой счёт");
                 return photoScore;
             }
+            else
+                Debug.LogWarning($"CalculateScore: CurrentState равен {animalAI.StateMachine.CurrentState.StateType}, нужно {state}");
 
             float multiplier;
             if (animalAI.StateMachine.CurrentAnimalState == state)

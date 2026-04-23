@@ -61,9 +61,10 @@ namespace Game.Scripts.Quest
 
         private void OnVerifyClicked()
         {
-            var animal = _photoProvider.TargetAnimal;
-            Debug.LogWarning($"Animal {animal.name}; quest correct {_currentQuest.IsCorrectTarget(animal)}");
-            if (animal != null && _currentQuest.IsCorrectTarget(animal))
+            var data = _photoProvider.LastPhotoData;
+            if (data == null) return;
+            
+            if (data != null && _currentQuest.IsCorrectTarget(data))
             {
                 _service.CompleteActiveQuest();
                 _parentJournal.RefreshJournal();

@@ -4,7 +4,13 @@ namespace Game.Scripts.Service
 {
     public interface IAnimalInPhotoProvider
     {
-        BaseAnimalAI TargetAnimal { get; set; }
-        event Action<BaseAnimalAI> OnTargetAnimalChanged;
+        CapturedPhotoData LastPhotoData { get; set; }
+        event Action<CapturedPhotoData> OnCaptureDataChanged;
+    }
+
+    public class CapturedPhotoData
+    {
+        public AnimalType AnimalType;
+        public AnimalState  AnimalState;
     }
 }

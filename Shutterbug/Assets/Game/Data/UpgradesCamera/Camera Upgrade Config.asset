@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _levels:
   - level: 0
-    cooldownDuration: 10
+    cooldownDuration: 5
     zoomSpeed: 10
     maxFOV: 60
     minFOV: 40
-    captureDistance: 50
+    captureDistance: 100
   - level: 1
     cooldownDuration: 9
     zoomSpeed: 10
