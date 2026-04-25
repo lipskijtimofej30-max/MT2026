@@ -72,6 +72,7 @@ namespace Game.Scripts.Quest
                 _windowRoot.anchoredPosition = new Vector2(_originalAnchoredPosition.x, 0);
                 _windowRoot.localScale = Vector3.one;
                 _canvasGroup.alpha = 1f;
+                Open();
                 RefreshJournal();
             }
             else
@@ -116,13 +117,13 @@ namespace Game.Scripts.Quest
             } 
             else
             {
-                // Если активного квеста нет, можно скрыть панель или показать заглушку
                 _detailsPanel.gameObject.SetActive(false);
             }
             
             if (_currentAnimationCoroutine != null) StopCoroutine(_currentAnimationCoroutine);
             DOTween.Kill(_windowRoot);
-            _currentAnimationCoroutine = StartCoroutine(ShowAnimation());
+            if(gameObject.activeInHierarchy)
+                _currentAnimationCoroutine = StartCoroutine(ShowAnimation());
         }
 
         private void Close()
@@ -131,12 +132,8 @@ namespace Game.Scripts.Quest
 
             if (_currentAnimationCoroutine != null) StopCoroutine(_currentAnimationCoroutine);
             DOTween.Kill(_windowRoot);
-            _currentAnimationCoroutine = StartCoroutine(HideAnimation());
-        }
-
-        public void ToggleWindow(bool active)
-        {
-            gameObject.SetActive(active);
+            if(gameObject.activeInHierarchy)
+                _currentAnimationCoroutine = StartCoroutine(HideAnimation());
         }
 
         private IEnumerator ShowAnimation()
@@ -153,11 +150,6 @@ namespace Game.Scripts.Quest
             sequence.Join(_canvasGroup.DOFade(1f, _showDuration).SetEase(_showEase));
 
             yield return sequence.WaitForCompletion();
-            
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            _cameraCaptureView.ToggleUI(false);
-            _playerController.ToggleController(false);
         }
 
         private IEnumerator HideAnimation()
@@ -172,10 +164,6 @@ namespace Game.Scripts.Quest
             yield return sequence.WaitForCompletion();
             
             _detailsPanel.gameObject.SetActive(false);
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            _cameraCaptureView.ToggleUI(true);
-            _playerController.ToggleController(true);
         }
     }
 }

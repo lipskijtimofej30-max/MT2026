@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Zenject;
 
@@ -11,6 +12,16 @@ namespace Game.Scripts.Core
         private void Construct(GameStateMachine stateMachine)
         {
             _modeManager = stateMachine;
+        }
+
+        private void Start()
+        {
+            _modeManager.OnStateChanged += OnModeChange;
+        }
+
+        private void OnDestroy()
+        {
+            _modeManager.OnStateChanged -= OnModeChange;
         }
 
         private void Update()
@@ -27,6 +38,11 @@ namespace Game.Scripts.Core
                 else
                     _modeManager.SwitchState(GameMode.Tablet);
             }
+        }
+        
+        private void OnModeChange(GameMode oldMode,GameMode newMode)
+        {   
+            Debug.LogWarning($"Game mode was {oldMode} change to {newMode}");
         }
     }
 }

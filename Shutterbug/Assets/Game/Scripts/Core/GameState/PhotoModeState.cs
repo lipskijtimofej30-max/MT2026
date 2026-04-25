@@ -1,5 +1,6 @@
 using Game.Scripts.CameraPhoto;
 using UnityEngine;
+using Zenject;
 
 namespace Game.Scripts.Core
 {
@@ -7,20 +8,22 @@ namespace Game.Scripts.Core
     {
         public GameMode GameMode => GameMode.Photo;
         
-        private readonly CameraCaptureView _cameraCaptureView;
-        private readonly CameraCaptureController _cameraCaptureController;
+        private CameraCaptureView _cameraCaptureView;
+        private CameraCaptureController _cameraCaptureController;
 
-        public PhotoModeState(CameraCaptureView cameraCaptureView, CameraCaptureController cameraCaptureController)
+        [Inject]
+        private void Construct(CameraCaptureView cameraCaptureView, CameraCaptureController cameraCaptureController)
         {
             _cameraCaptureView = cameraCaptureView;
             _cameraCaptureController = cameraCaptureController;
         }
+
         public void Enter()
         {
             _cameraCaptureView.SetUIActive(true);
             _cameraCaptureController.OnEnterPhotoMode();
-            Cursor.lockState = CursorLockMode.Confined;
-            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
 
         public void Exit()

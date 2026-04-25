@@ -61,14 +61,11 @@ namespace Game.Scripts.CameraPhoto
 
         private void Update()
         {
-            // Обработка зума
             _zoomModule.UpdateZoom(Input.GetAxis("Mouse ScrollWheel"));
             
-            // Кулдаун
             _cooldownModule.Progress(Time.deltaTime);
             _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
 
-            // Захват по клавише E
             if (_cooldownModule.IsReady && Input.GetKeyDown(KeyCode.E))
             {
                 ExecuteCapture().Forget();

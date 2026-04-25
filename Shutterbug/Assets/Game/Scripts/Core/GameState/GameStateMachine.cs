@@ -7,13 +7,14 @@ namespace Game.Scripts.Core
 {
     public class GameStateMachine: IInitializable, IDisposable
     {
-        private readonly Dictionary<GameMode, IGameState> _states;
+        private Dictionary<GameMode, IGameState> _states;
         private IGameState _currentState;
         
         public GameMode CurrentMode => _currentState?.GameMode ?? GameMode.Exploration;
         public event Action<GameMode, GameMode> OnStateChanged;
 
-        public GameStateMachine(ExplorationState explorationState, PhotoModeState photoModeState, TabletState tabletState)
+        [Inject]
+        private void Construct(ExplorationState explorationState, PhotoModeState photoModeState, TabletState tabletState)
         {
             _states = new()
             {
@@ -22,7 +23,7 @@ namespace Game.Scripts.Core
                 {GameMode.Tablet, tabletState}
             };
         }
- 
+        
         public void Initialize()
         {
             SwitchState(GameMode.Exploration);

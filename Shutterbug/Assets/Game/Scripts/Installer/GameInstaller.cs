@@ -33,10 +33,10 @@ public class GameInstaller : MonoInstaller
 
     private void BindGameState()
     {
-        Container.Bind<GameStateMachine>().AsSingle();
         Container.Bind<ExplorationState>().AsSingle();
         Container.Bind<PhotoModeState>().AsSingle();
         Container.Bind<TabletState>().AsSingle();
+        Container.Bind<GameStateMachine>().AsSingle();
     }
 
     private void BindUI()

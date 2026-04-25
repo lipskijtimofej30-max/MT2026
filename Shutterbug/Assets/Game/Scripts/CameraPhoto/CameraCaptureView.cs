@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class CameraCaptureView : MonoBehaviour
 {
-    [SerializeField] private QuestJournalUI _questJournalUI;
     [SerializeField] private Image cameraUI;
     [SerializeField] private TMP_Text timerText;
 
@@ -21,7 +20,6 @@ public class CameraCaptureView : MonoBehaviour
     {
         if (cameraUI != null)
             cameraUI.gameObject.SetActive(active); 
-        _questJournalUI.gameObject.SetActive(!active);
     }
 
     public void UpdateTimerDisplay(float cooldown)
@@ -33,10 +31,5 @@ public class CameraCaptureView : MonoBehaviour
             lastDisplayedTime = displayValue;
             timerText.text = displayValue.ToString();
         }
-    }
-
-    public void ToggleUI(bool active)
-    {
-        gameObject.SetActive(active);
     }
 }

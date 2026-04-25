@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 using Cursor = UnityEngine.Cursor;
 
 namespace Game.Scripts.Core
@@ -8,9 +9,10 @@ namespace Game.Scripts.Core
     {
         public GameMode GameMode => GameMode.Exploration;
         
-        private readonly PlayerController _playerController;
+        private PlayerController _playerController;
         
-        public ExplorationState(PlayerController playerController)
+        [Inject]
+        private void Construct(PlayerController playerController)
         {
             _playerController = playerController;
         }

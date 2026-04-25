@@ -22,17 +22,9 @@ namespace Game.Scripts.UI
         [SerializeField] private Ease _showEase = Ease.OutBack;
         [SerializeField] private Ease _hideEase = Ease.InBack; 
         
-        private GameStateMachine _stateMachine;
-        
         private Vector2 _originalAnchoredPosition;
         private Coroutine _currentAnimationCoroutine;
         private bool _isOpen;
-
-        [Inject]
-        private void Construct(GameStateMachine stateMachine)
-        {
-            _stateMachine = stateMachine;
-        }
 
         private void Start()
         {
@@ -40,20 +32,18 @@ namespace Game.Scripts.UI
             Close();
         }
 
-        private void Update()
+        public void OnEnterState()
         {
-            if (Input.GetKeyDown(KeyCode.H)) ToggleTablet();
+            Open();
         }
 
-        private void ToggleTablet()
+        public void OnExitState()
         {
-            if (!_isOpen) Open();
-            else Close();
+            Close();
         }
  
-        public void Open()
+        private void Open()
         {
-            _stateMachine.SwitchState(GameMode.Tablet);
             _isOpen = true;
 
             _windowRoot.anchoredPosition = _originalAnchoredPosition - Vector2.up * _showMoveDistance;
@@ -65,7 +55,7 @@ namespace Game.Scripts.UI
             _currentAnimationCoroutine = StartCoroutine(ShowAnimation());
         }
         
-        public void Close()
+        private void Close()
         {
             _isOpen = false;
 
