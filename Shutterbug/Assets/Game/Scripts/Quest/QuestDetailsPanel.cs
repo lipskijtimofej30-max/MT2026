@@ -30,7 +30,6 @@ namespace Game.Scripts.Quest
         {
             SetBaseInfo(quest);
             _buttonText.text = "Взять квест";
-            _actionButton.onClick.RemoveAllListeners();
             _actionButton.onClick.AddListener(OnAcceptClicked);
             gameObject.SetActive(true);
         }

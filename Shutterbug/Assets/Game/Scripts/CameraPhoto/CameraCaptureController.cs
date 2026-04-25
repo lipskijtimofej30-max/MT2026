@@ -37,37 +37,41 @@ namespace Game.Scripts.CameraPhoto
         private void Awake()
         {
             _view = GetComponent<CameraCaptureView>();
+            
             _zoomModule = new CameraZoomModule(virtualCamera, _progressionService);
             _cooldownModule = new CooldownModule(_progressionService);
+            
             _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
             _cooldownModule.Reset();
         }
 
-        private void Update()
+        public void OnEnterPhotoMode()
         {
-            HandleInput();
+            _cooldownModule.Reset();
+            _zoomModule.ResetZoom();
+            _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
+            enabled = true; 
         }
 
-        private void HandleInput()
+        public void OnExitPhotoMode()
         {
-            bool isAiming = Input.GetMouseButton(1);
-            _view.SetUIActive(isAiming);
+            enabled = false;
+            _zoomModule.ResetZoom(); 
+        }
 
-            if (isAiming)
-            {
-                _zoomModule.UpdateZoom(Input.GetAxis("Mouse ScrollWheel"));
-                
-                _cooldownModule.Progress(Time.deltaTime);
-                _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
+        private void Update()
+        {
+            // Обработка зума
+            _zoomModule.UpdateZoom(Input.GetAxis("Mouse ScrollWheel"));
+            
+            // Кулдаун
+            _cooldownModule.Progress(Time.deltaTime);
+            _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
 
-                if (_cooldownModule.IsReady && Input.GetKeyDown(KeyCode.E))
-                {
-                    ExecuteCapture().Forget();
-                }
-            }
-            else
+            // Захват по клавише E
+            if (_cooldownModule.IsReady && Input.GetKeyDown(KeyCode.E))
             {
-                _zoomModule.ResetZoom();
+                ExecuteCapture().Forget();
             }
         }
 

@@ -23,11 +23,9 @@ namespace Game.Scripts.Quest
         {
             _quest = quest;
             _onSelected = onSelected;
-            _titleText.text = quest.Description.ShortTitle;
-            if (isActive)
-            {
+            _titleText.text = quest?.Description.ShortTitle ?? "Ничего нету??????";
+            if (isActive && _image != null)
                 _image.color = Color.yellow;
-            }
             _selectButton.onClick.RemoveAllListeners();
             _selectButton.onClick.AddListener(HandleClick);
         }

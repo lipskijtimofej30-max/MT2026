@@ -82,19 +82,20 @@ public class CameraCapture : MonoBehaviour
         Vector3 direction = animal.transform.position - camera.transform.position;
         float distance = direction.magnitude;
     
-        if (distance > _progressionService.CurrentLevelData.captureDistance)
-            return false;
+        //if (distance > _progressionService.CurrentLevelData.captureDistance)
+            //return false;
         
         Vector3 targetPoint = animal.transform.position + Vector3.up * 0.5f; 
         Vector3 rayDirection = targetPoint - camera.transform.position;
-
-        if (Physics.SphereCast(camera.transform.position, 0.5f ,rayDirection, out RaycastHit hit, distance + 1f))
+        var objs = Physics.SphereCastAll(camera.transform.position, 0.5f, rayDirection, distance + 1f);
+        for (int i = 0; i < 5; i++)
         {
-            if (hit.collider.transform.root == animal.transform.root)
+            var obj = objs[i];
+            if (obj.collider.transform.root == animal.transform.root)
                 return true;
             else
-                Debug.LogWarning($"View blocked by: {hit.collider.name}");
-        }
+                Debug.LogWarning($"View blocked by: {obj.collider.name}");
+        }    
         return false;
     }
 }

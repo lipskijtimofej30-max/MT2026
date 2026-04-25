@@ -1,12 +1,13 @@
 using System.Collections;
 using DG.Tweening;
+using Game.Scripts.Core;
 using Game.Scripts.Service;
 using UnityEngine;
 using Zenject;
 
 namespace Game.Scripts.Quest
 {
-    public class QuestJournalUI : MonoBehaviour
+    public class QuestJournalUI : TabletWindow
     {
         [Header("Settings")]
         [SerializeField] private RectTransform _windowRoot;
@@ -47,16 +48,37 @@ namespace Game.Scripts.Quest
             _originalAnchoredPosition = _windowRoot.anchoredPosition;
             Close();
         }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.H)) ToggleJournal();
-        }
-
-        public void ToggleJournal()
+        
+        public override void ToggleWindow()
         {
             _isOpen = !_isOpen;
             if (_isOpen) Open(); else Close();
+        }
+
+        public override void SetVisible(bool visible)
+        {
+            _isOpen = visible;
+            gameObject.SetActive(visible);
+
+            if (_currentAnimationCoroutine != null)
+            {
+                StopCoroutine(_currentAnimationCoroutine);
+                _currentAnimationCoroutine = null;
+            }
+            DOTween.Kill(_windowRoot);
+
+            if (visible)
+            {
+                _windowRoot.anchoredPosition = new Vector2(_originalAnchoredPosition.x, 0);
+                _windowRoot.localScale = Vector3.one;
+                _canvasGroup.alpha = 1f;
+                RefreshJournal();
+            }
+            else
+            {
+                _windowRoot.localScale = Vector3.zero;
+                _canvasGroup.alpha = 0f;
+            }
         }
 
         public void RefreshJournal()
@@ -71,6 +93,7 @@ namespace Game.Scripts.Quest
 
             foreach (var quest in _service.AvailableInJournal)
             {
+                if(quest == null) continue;
                 var card = Instantiate(_cardPrefab, _content);
                 card.Setup(quest, _detailsPanel.ShowAvailable, false);
             }
