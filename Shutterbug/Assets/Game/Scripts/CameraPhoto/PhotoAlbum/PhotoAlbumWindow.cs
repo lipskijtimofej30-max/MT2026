@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Game.Scripts.Core;
 using UnityEngine;
@@ -26,6 +24,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         private PhotoController _photoController;
         private PhotoRegistry _photoRegistry;
         
+        private List<PhotoAlbumCardUI> _activeCards = new();
         private Coroutine _currentAnimationCoroutine;
         private bool _isOpen;
 
@@ -106,19 +105,24 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
 
         private void RefreshAlbum()
         {
-            foreach (Transform child in _content) Destroy(child.gameObject);
+            foreach (var card in _activeCards)
+                Destroy(card.gameObject);
+            _activeCards.Clear();
 
             if (_photoController.CurrentPhotoRecord != null)
             {
-                var card =  Instantiate(_cardPrefab, _content);
-                card.Init(_photoController.CurrentPhotoRecord,_photoController.SetCurrentPhoto, true);
+                var card = Instantiate(_cardPrefab, _content);
+                card.Init(_photoController.CurrentPhotoRecord, _photoController.SetCurrentPhoto, true);
+                _activeCards.Add(card);
             }
 
             foreach (var photo in _photoRegistry.Photos)
             {
-                if(photo == null) continue;
+                if (photo == null || photo == _photoController.CurrentPhotoRecord) continue; 
                 var card = Instantiate(_cardPrefab, _content);
-                card.Init(photo,_photoController.SetCurrentPhoto, false);
+                bool isActive = _photoController.CurrentPhotoRecord == photo;
+                card.Init(photo, _photoController.SetCurrentPhoto, isActive);
+                _activeCards.Add(card);
             }
         }
         

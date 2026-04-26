@@ -87,11 +87,7 @@ namespace Game.Scripts.CameraPhoto
             {
                 var bestTarget = data.animals[0];
                 var score = _evaluator.CalculateScore(bestTarget, virtualCamera);
-                _animalInPhotoProvider.LastPhotoData = new CapturedPhotoData
-                {
-                    AnimalType =  bestTarget.AnimalType,
-                    AnimalState = bestTarget.CurrentState,
-                };
+                _animalInPhotoProvider.LastPhotoData = new CapturedPhotoData(bestTarget.AnimalType, bestTarget.CurrentState);
                 Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState}; Distance to animal {Vector3.Distance(bestTarget.transform.position, virtualCamera.transform.position)} ");
                 _provider.Score = score;
                 

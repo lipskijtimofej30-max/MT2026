@@ -34,7 +34,7 @@ namespace Game.Scripts.Quest
         private void Construct(QuestService service, IAnimalInPhotoProvider photoProvider)
         {
             _service = service;
-            _detailsPanel.Construct(service, photoProvider, this);
+            _detailsPanel.Construct(service,this);
         }
         
         public override void ToggleWindow()
@@ -75,14 +75,14 @@ namespace Game.Scripts.Quest
             if (_service.CurrentQuest != null)
             {
                 var card = Instantiate(_cardPrefab, _content);
-                card.Setup(_service.CurrentQuest, _detailsPanel.ShowActive, true);
+                card.Setup(_service.CurrentQuest, _detailsPanel.ShowActiveQuest, true);
             }
 
             foreach (var quest in _service.AvailableInJournal)
             {
                 if(quest == null) continue;
                 var card = Instantiate(_cardPrefab, _content);
-                card.Setup(quest, _detailsPanel.ShowAvailable, false);
+                card.Setup(quest, _detailsPanel.ActivateQuest, false);
             }
         }
 

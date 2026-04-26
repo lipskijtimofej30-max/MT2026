@@ -1,7 +1,9 @@
+using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Service;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace Game.Scripts.Quest
 {
@@ -15,65 +17,73 @@ namespace Game.Scripts.Quest
 
         private PhotoQuest _currentQuest;
         private QuestService _service;
-        private IAnimalInPhotoProvider _photoProvider;
+        private PhotoController _photoController;
         private QuestJournalUI _parentJournal;
 
-        public void Construct(QuestService service, IAnimalInPhotoProvider photoProvider, QuestJournalUI journal)
+        [Inject]
+        private void Construct(PhotoController photoController)
+        {
+            _photoController = photoController;
+        }
+        
+        public void Construct(QuestService service, QuestJournalUI journal)
         {
             _service = service;
-            _photoProvider = photoProvider;
             _parentJournal = journal;
         }
 
-        // Режим просмотра (квест еще не взят)
-        public void ShowAvailable(PhotoQuest quest)
-        {
-            SetBaseInfo(quest);
-            _buttonText.text = "Взять квест";
-            _actionButton.onClick.AddListener(OnAcceptClicked);
-            gameObject.SetActive(true);
-        }
-
-        // Режим активного квеста (уже в работе)
         public void ShowActive(PhotoQuest quest)
         {
             SetBaseInfo(quest);
             _buttonText.text = "Проверить фото";
+
             _actionButton.onClick.RemoveAllListeners();
-            _actionButton.onClick.AddListener(OnVerifyClicked);
+            _actionButton.onClick.AddListener(TryCompleteQuest);
+
             gameObject.SetActive(true);
         }
+        
+        public void ActivateQuest(PhotoQuest quest)
+        {
+            _service.AcceptQuest(quest);
+            _parentJournal.RefreshJournal();    
+            ShowActive(quest);
+        }
 
+        public void ShowActiveQuest(PhotoQuest quest)
+        {
+            ShowActive(quest);
+        }
+        
+        
         private void SetBaseInfo(PhotoQuest quest)
         {
             _currentQuest = quest;
             _title.text = quest.Description.ShortTitle;
-            _description.text = quest.Description.FullDescription; // Художественное описание
+            _description.text = quest.Description.FullDescription;
         }
 
-        private void OnAcceptClicked()
+        private void TryCompleteQuest()
         {
-            _service.AcceptQuest(_currentQuest);
-            _parentJournal.RefreshJournal(); // Обновляем список слева
-            ShowActive(_currentQuest);      // Переключаем эту же панель в режим проверки
-        }
+            PhotoRecord currentPhoto = _photoController.CurrentPhotoRecord;
 
-        private void OnVerifyClicked()
-        {
-            var data = _photoProvider.LastPhotoData;
-            if (data == null) return;
-            
-            if (data != null && _currentQuest.IsCorrectTarget(data))
+            if (currentPhoto == null)
+            {
+                Debug.LogWarning("Нет выбранного фото для проверки квеста!");
+            }
+
+            var capturedData = new CapturedPhotoData(currentPhoto.animalType, currentPhoto.animalStateType);
+
+            if (_currentQuest.IsCorrectTarget(capturedData))
             {
                 _service.CompleteActiveQuest();
                 _parentJournal.RefreshJournal();
-                gameObject.SetActive(false); // Закрываем детали после успеха
-                Debug.Log("Квест сдан!");
+                gameObject.SetActive(false);
+                Debug.LogWarning("Квест выполнен!");
             }
             else
             {
-                Debug.LogWarning("Фото не подходит!");
-                // Тут можно добавить анимацию тряски кнопки
+                Debug.LogWarning("Фото не соответствует условиям квеста!");
             }
         }
     }

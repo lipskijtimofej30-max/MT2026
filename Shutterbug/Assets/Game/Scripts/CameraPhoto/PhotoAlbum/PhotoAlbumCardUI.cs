@@ -14,6 +14,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         
         private PhotoRecord _photoRecord;
         private Action<PhotoRecord> _onSelected;
+        
 
         public void Init(PhotoRecord photoRecord, Action<PhotoRecord> onSelected, bool isActive = false)
         {
