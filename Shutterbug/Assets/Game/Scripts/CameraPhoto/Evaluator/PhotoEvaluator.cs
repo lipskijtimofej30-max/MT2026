@@ -5,7 +5,7 @@ namespace Game.Scripts
 {
     public class PhotoEvaluator
     {
-        public PhotoScore CalculateScore(BaseAnimalAI animalAI, AnimalState state, CinemachineVirtualCamera camera)
+        public PhotoScore CalculateScore(BaseAnimalAI animalAI, CinemachineVirtualCamera camera)
         {
             PhotoScore photoScore = new PhotoScore();
             
@@ -19,20 +19,8 @@ namespace Game.Scripts
                 Debug.LogError("CalculateScore: StateMachine равен null");
                 return photoScore;
             }
-            if (animalAI.StateMachine.CurrentState == null)
-            {
-                Debug.LogWarning("CalculateScore: CurrentState равен null, возвращается нулевой счёт");
-                return photoScore;
-            }
-            else
-                Debug.LogWarning($"CalculateScore: CurrentState равен {animalAI.StateMachine.CurrentState.StateType}, нужно {state}");
 
-            float multiplier;
-            if (animalAI.StateMachine.CurrentAnimalState == state)
-                multiplier = 1f;
-            else
-                multiplier = 0.2f;
-            photoScore.PosePoints = Mathf.RoundToInt(100f * multiplier);
+            photoScore.PoseMultiplier = animalAI.StateMachine.CurrentState.GetStateMultiplier();
             
             float distance = Vector3.Distance(animalAI.transform.position, camera.transform.position);
             photoScore.SizePoints = Mathf.RoundToInt(Mathf.Clamp(100000f/(distance * camera.m_Lens.FieldOfView), 0.1f, 500f));
@@ -41,18 +29,18 @@ namespace Game.Scripts
             float distanceFromCenter = Vector2.Distance(new Vector2(0.5f, 0.5f), new  Vector2(viewportPosition.x, viewportPosition.y));
             photoScore.PlacementPoints = Mathf.RoundToInt(Mathf.Clamp(300f * (1f - distanceFromCenter), 0.1f, 300f));
             
-            photoScore.TotalScore = photoScore.PosePoints + photoScore.PlacementPoints + photoScore.SizePoints;
+            photoScore.TotalScore = (int)(photoScore.PlacementPoints + photoScore.SizePoints * photoScore.PoseMultiplier);
             
-            Debug.LogWarning($"Pose points: {photoScore.PosePoints}, Size points: {photoScore.SizePoints}, Placement points: {photoScore.PlacementPoints}(distance to center {distanceFromCenter}), Total points {photoScore.TotalScore}");
+            Debug.LogWarning($"Pose points: {photoScore.PoseMultiplier}, Size points: {photoScore.SizePoints}, Placement points: {photoScore.PlacementPoints}(distance to center {distanceFromCenter}), Total points {photoScore.TotalScore}");
             return photoScore;
         }
     }
 
     public class PhotoScore
     {
-        public int PosePoints;
-        public int SizePoints;
-        public int PlacementPoints;
+        public float PoseMultiplier;
+        public float SizePoints;
+        public float PlacementPoints;
         public int TotalScore;
     }
 }

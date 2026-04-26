@@ -80,6 +80,8 @@ namespace Game.Scripts
 
             return StateAction.GoToIdle;
         }
+        
+        public float GetStateMultiplier() => 1.2f; 
 
         private Vector3 GetRandomNavMeshPoint(Vector3 center, float radius)
         {

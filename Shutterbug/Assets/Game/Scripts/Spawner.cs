@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Game.Scripts.Factory;
 using UnityEngine;
 using Zenject;
@@ -6,7 +7,8 @@ namespace Game.Scripts
 {
     public class Spawner : MonoBehaviour
     {
-        [SerializeField] private Transform _posSpawn;
+        [SerializeField] private List<BaseAnimalAI> _animals = new();
+        [SerializeField] private List<Transform> _transformPoint;
         private IAnimalFactory _animalFactory;
 
         [Inject]
@@ -17,7 +19,11 @@ namespace Game.Scripts
 
         private void Start()
         {
-            _animalFactory.Spawn(_posSpawn.position);
+            foreach (var point in _transformPoint)
+            {
+                var index = Random.Range(0, _animals.Count);
+                _animalFactory.Spawn(point.position, _animals[index]);
+            }
         }
     }
 }

@@ -42,5 +42,8 @@ namespace Game.Scripts
 
             return StateAction.GoToWalk;
         }
+        
+        public float GetStateMultiplier() => 1f; 
+
     }
 }

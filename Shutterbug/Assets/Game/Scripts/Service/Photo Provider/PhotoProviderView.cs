@@ -70,7 +70,7 @@ namespace Game.Scripts.Service
             
             if (_scoreText != null)
             {
-                _scoreText.text = $"Очки: {score.TotalScore}\nПоза: {score.PosePoints}\nРазмер: {score.SizePoints}\nПоложение: {score.PlacementPoints}";
+                _scoreText.text = $"Очки: {score.TotalScore}\nРазмер: {score.SizePoints}\nПоложение: {score.PlacementPoints}\nМножитель редкости: {score.PoseMultiplier}";
                 _scoreText.gameObject.SetActive(true);
             }
             

@@ -22,16 +22,14 @@ namespace Game.Scripts.CameraPhoto
         private IProgressionService _progressionService;
         private IPhotoProvider _provider;
         private IAnimalInPhotoProvider _animalInPhotoProvider;
-        private QuestService _questService;
 
         [Inject]
-        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, IProgressionService progressionService, IAnimalInPhotoProvider animalInPhotoProvider,  QuestService questService)
+        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, IProgressionService progressionService, IAnimalInPhotoProvider animalInPhotoProvider)
         {
             _evaluator = evaluator;
             _provider = provider;
             _progressionService = progressionService;
             _animalInPhotoProvider = animalInPhotoProvider;
-            _questService = questService;
         }
 
         private void Awake()
@@ -86,7 +84,7 @@ namespace Game.Scripts.CameraPhoto
             if (targets != null && targets.Count > 0)
             {
                 var bestTarget = targets[0];
-                var score = _evaluator.CalculateScore(bestTarget, _questService.CurrentQuest.RequiredState, virtualCamera);
+                var score = _evaluator.CalculateScore(bestTarget, virtualCamera);
                 _animalInPhotoProvider.LastPhotoData = new CapturedPhotoData
                 {
                     AnimalType =  bestTarget.AnimalType,

@@ -23,6 +23,6 @@ namespace Game.Scripts.Quest
     public struct Description
     {
         public string ShortTitle;
-        public string FullDescription;
+        [TextArea]public string FullDescription;
     }
 }

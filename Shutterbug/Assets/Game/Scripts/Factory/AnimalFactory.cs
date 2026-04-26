@@ -6,7 +6,7 @@ namespace Game.Scripts.Factory
 {
     public class AnimalFactory: MonoBehaviour, IAnimalFactory
     {
-        [SerializeField] private BaseAnimalAI _prefab;
+        
         private DiContainer _container;
         private AnimalRegistry _animalRegistry;
         
@@ -17,9 +17,9 @@ namespace Game.Scripts.Factory
             _animalRegistry = animalRegistry;
         }
 
-        public BaseAnimalAI Spawn(Vector3 position)
+        public BaseAnimalAI Spawn(Vector3 position, BaseAnimalAI prefab)
         {
-            var obj = _container.InstantiatePrefabForComponent<BaseAnimalAI>(_prefab.gameObject, position, Quaternion.identity, transform);
+            var obj = _container.InstantiatePrefabForComponent<BaseAnimalAI>(prefab.gameObject, position, Quaternion.identity, transform);
             _animalRegistry.Register(obj);
             Debug.Log($"Spawn animal: {obj.name}");
             return obj;

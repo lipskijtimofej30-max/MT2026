@@ -11,6 +11,7 @@ namespace Game.Scripts
     {
         [SerializeField] private NavMeshAgent _agent;
         [SerializeField] private Animator _animator;
+        [SerializeField] private AnimalType _animalType = AnimalType.Rabbit;
         [SerializeField] private float _distanceToFlee = 15f;
         private GameMath _gameMath;
         
@@ -42,7 +43,7 @@ namespace Game.Scripts
             };
             
             _stateMachine = new StateMachine(map);
-            AnimalType = AnimalType.Rabbit;
+            AnimalType = _animalType;
             await StateMachine.Start(_idleState).AttachExternalCancellation(destroyCancellationToken);
         }
 

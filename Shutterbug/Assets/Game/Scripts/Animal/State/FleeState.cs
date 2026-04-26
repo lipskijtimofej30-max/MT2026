@@ -62,6 +62,8 @@ namespace Game.Scripts
             return StateAction.Stay;
         }
 
+        public float GetStateMultiplier() => 1.5f; 
+
         private Vector3 GetNavMeshPoint(Vector3 desiredPosition)
         {
             for (int i = 0; i < _maxAttempts; i++)

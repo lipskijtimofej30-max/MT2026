@@ -6,4 +6,5 @@ public interface IState
 {
     AnimalState StateType { get; }
     UniTask<StateAction> OnEnter(CancellationToken ct);
+    float GetStateMultiplier();
 }

@@ -82,8 +82,8 @@ public class CameraCapture : MonoBehaviour
         Vector3 direction = animal.transform.position - camera.transform.position;
         float distance = direction.magnitude;
     
-        //if (distance > _progressionService.CurrentLevelData.captureDistance)
-            //return false;
+        if (distance > _progressionService.CurrentLevelData.captureDistance)
+            return false;
         
         Vector3 targetPoint = animal.transform.position + Vector3.up * 0.5f; 
         Vector3 rayDirection = targetPoint - camera.transform.position;
