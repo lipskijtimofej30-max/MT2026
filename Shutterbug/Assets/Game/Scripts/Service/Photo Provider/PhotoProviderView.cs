@@ -15,12 +15,11 @@ namespace Game.Scripts.Service
 
         [Header("Animation Settings")] 
         [SerializeField] private float _flyDuration = 0.5f;
-        [SerializeField] private float _displayTime = 2f;
+        [SerializeField] private float _displayTime = 3.5f;
         [SerializeField] private float _fadeOutDuration = 0.4f;
 
         private IPhotoProvider _photoProvider;
         private PlayerController _playerController;
-        private Vector2 _targetPosition;
         private Coroutine _currentAnimation;
 
         [Inject]
@@ -38,7 +37,6 @@ namespace Game.Scripts.Service
 
         private void Start()
         {
-            _targetPosition = _image.rectTransform.anchoredPosition;
             _image.gameObject.SetActive(false);
             _canvasGroup.alpha = 0f;
 

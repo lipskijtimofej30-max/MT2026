@@ -1,3 +1,4 @@
+using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Quest;
 using Game.Scripts.Service;
 using UnityEngine;
@@ -7,6 +8,7 @@ namespace Game.Scripts
 {
     public class ServiceInstaller : MonoInstaller
     {
+        [SerializeField] private PhotoController _photoController;
         [SerializeField] private CameraUpgradesConfig _cameraConfig;
         [SerializeField] private QuestDatabase _questDatabase;
         override public void InstallBindings()
@@ -15,9 +17,10 @@ namespace Game.Scripts
             Container.Bind<PhotoEvaluator>().To<PhotoEvaluator>().AsSingle();
             
             Container.Bind<IAnimalInPhotoProvider>().To<AnimalInPhotoProvider>().AsSingle();
+            
             BindQuestService();
-
             BindProgressionService();
+            BindPhotoAlbum();
         }
 
         private void BindQuestService()
@@ -30,6 +33,12 @@ namespace Game.Scripts
         {
             Container.Bind<IProgressionService>().To<ProgressionService>().AsSingle();
             Container.Bind<CameraUpgradesConfig>().FromInstance(_cameraConfig).AsSingle();
+        }
+
+        private void BindPhotoAlbum()
+        {
+            Container.Bind<PhotoRegistry>().AsSingle();
+            Container.Bind<PhotoController>().FromInstance(_photoController).AsSingle();
         }
     }
 }

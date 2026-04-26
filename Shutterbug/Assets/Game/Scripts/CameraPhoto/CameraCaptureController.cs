@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using Cinemachine;
 using Cysharp.Threading.Tasks;
-using Game.Scripts.Quest;
+using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Service;
 using UnityEngine;
 using Zenject;
@@ -22,14 +21,17 @@ namespace Game.Scripts.CameraPhoto
         private IProgressionService _progressionService;
         private IPhotoProvider _provider;
         private IAnimalInPhotoProvider _animalInPhotoProvider;
+        private PhotoController _photoController;
 
         [Inject]
-        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, IProgressionService progressionService, IAnimalInPhotoProvider animalInPhotoProvider)
+        private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, IProgressionService progressionService,
+            IAnimalInPhotoProvider animalInPhotoProvider, PhotoController photoController)
         {
             _evaluator = evaluator;
             _provider = provider;
             _progressionService = progressionService;
             _animalInPhotoProvider = animalInPhotoProvider;
+            _photoController = photoController;
         }
 
         private void Awake()
@@ -72,18 +74,18 @@ namespace Game.Scripts.CameraPhoto
 
         private async UniTaskVoid ExecuteCapture()
         {
-            var targets = await cameraCapture.Capture();
+            var data = await cameraCapture.Capture();
             
-            ProcessResults(targets);
+            ProcessResults(data);
 
             _cooldownModule.Reset();
         }
 
-        private void ProcessResults(List<BaseAnimalAI> targets)
+        private void ProcessResults(CapturedData data)
         {
-            if (targets != null && targets.Count > 0)
+            if (data.animals != null && data.animals.Count > 0)
             {
-                var bestTarget = targets[0];
+                var bestTarget = data.animals[0];
                 var score = _evaluator.CalculateScore(bestTarget, virtualCamera);
                 _animalInPhotoProvider.LastPhotoData = new CapturedPhotoData
                 {
@@ -92,6 +94,9 @@ namespace Game.Scripts.CameraPhoto
                 };
                 Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState}; Distance to animal {Vector3.Distance(bestTarget.transform.position, virtualCamera.transform.position)} ");
                 _provider.Score = score;
+                
+                _photoController.AddPhoto(new PhotoRecord(data.thumbnail, bestTarget.AnimalType, bestTarget.CurrentState, score,
+                    System.DateTime.Now.ToString("HH:mm:ss"), false));
             }
             else
             {

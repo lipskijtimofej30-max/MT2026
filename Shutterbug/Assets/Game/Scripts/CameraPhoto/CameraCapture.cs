@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Game.Scripts;
+using Game.Scripts.Core;
 using Game.Scripts.Factory;
 using Game.Scripts.Service;
 using UnityEngine;
@@ -10,44 +11,48 @@ using Zenject;
 
 public class CameraCapture : MonoBehaviour
 {
-    [SerializeField] private Camera targetCamera;
-    [SerializeField] private int captureWidth = 1920;
-    [SerializeField] private int captureHeight = 1080;
+    [SerializeField] private Camera _targetCamera;
+    [SerializeField] private TextureSize _captureSize;
+    [SerializeField] private TextureSize _thumbnailSize;
     
     private BaseAnimalAI animalAI;
-
+    
     private IPhotoProvider _photoProvider;
     private AnimalRegistry _animalRegistry;
     private IProgressionService _progressionService;
 
     [Inject]
-    private void Construct(IPhotoProvider photoProvider, AnimalRegistry animalRegistry, IProgressionService progressionService)
+    private void Construct(IPhotoProvider photoProvider, AnimalRegistry animalRegistry, 
+        IProgressionService progressionService)
     {
         _photoProvider = photoProvider;
         _animalRegistry = animalRegistry;
         _progressionService = progressionService;
     }
 
-    public async UniTask<List<BaseAnimalAI>> Capture()
+    public async UniTask<CapturedData> Capture()
     {
-        RenderTexture rt = new RenderTexture(captureWidth, captureHeight, 24);
-        targetCamera.targetTexture = rt;
+        RenderTexture rt = new RenderTexture(_captureSize.Width, _captureSize.Height, 24);
+        _targetCamera.targetTexture = rt;
 
-        Texture2D screenshot = new Texture2D(captureWidth, captureHeight, TextureFormat.RGB24, false);
-        targetCamera.Render();
+        Texture2D screenshot = new Texture2D(_captureSize.Width, _captureSize.Height, TextureFormat.RGB24, false);
+
+        _targetCamera.Render();
         RenderTexture.active = rt;
 
-        screenshot.ReadPixels(new Rect(0, 0, captureWidth, captureHeight), 0, 0);
+        screenshot.ReadPixels(new Rect(0, 0, _captureSize.Width, _captureSize.Height), 0, 0);
         screenshot.Apply();
 
-        targetCamera.targetTexture = null;
+        _targetCamera.targetTexture = null;
         RenderTexture.active = null;
         Destroy(rt);
         
         await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
         _photoProvider.Photo = screenshot;
+        Texture2D thumbnail = screenshot.ResizeTexture(_thumbnailSize.Width, _thumbnailSize.Height);
 
-        return GetAnimalInFrame();
+
+        return new CapturedData(GetAnimalInFrame(), thumbnail);
     }
 
     private List<BaseAnimalAI> GetAnimalInFrame()
@@ -59,12 +64,12 @@ public class CameraCapture : MonoBehaviour
         {
             if (animal == null) continue;
         
-            var pos = targetCamera.WorldToViewportPoint(animal.transform.position);
+            var pos = _targetCamera.WorldToViewportPoint(animal.transform.position);
             bool isInFrustum = pos.z > 0 && pos.x > 0 && pos.x < 1 && pos.y > 0 && pos.y < 1;
         
             if (isInFrustum)
             {
-                if (CheckLineOfSight(targetCamera, animal))
+                if (CheckLineOfSight(_targetCamera, animal))
                 {
                     result.Add(animal);
                 }
@@ -74,7 +79,7 @@ public class CameraCapture : MonoBehaviour
                 }
             }
         }
-        return result.OrderBy(a => Vector2.Distance(new Vector2(0.5f, 0.5f), targetCamera.WorldToViewportPoint(a.transform.position))).ToList();
+        return result.OrderBy(a => Vector2.Distance(new Vector2(0.5f, 0.5f), _targetCamera.WorldToViewportPoint(a.transform.position))).ToList();
     }
 
     private bool CheckLineOfSight(Camera camera, BaseAnimalAI animal)
@@ -98,4 +103,23 @@ public class CameraCapture : MonoBehaviour
         }    
         return false;
     }
+}
+
+public class CapturedData
+{
+    public List<BaseAnimalAI> animals;
+    public Texture2D thumbnail;
+
+    public CapturedData(List<BaseAnimalAI> animals, Texture2D thumbnail)
+    {
+        this.animals = animals;
+        this.thumbnail = thumbnail;
+    }
+}
+
+[Serializable]
+public struct TextureSize
+{
+    public int Width;
+    public int Height;
 }

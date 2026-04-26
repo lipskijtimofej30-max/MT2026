@@ -31,7 +31,7 @@ namespace Game.Scripts.Core
             if (Input.GetMouseButtonUp(1))
                 _modeManager.SwitchState(GameMode.Exploration);
 
-            if (Input.GetKeyDown(KeyCode.H))
+            if (Input.GetKeyDown(KeyCode.Tab))
             {
                 if (_modeManager.CurrentMode == GameMode.Tablet)
                     _modeManager.SwitchState(GameMode.Exploration);

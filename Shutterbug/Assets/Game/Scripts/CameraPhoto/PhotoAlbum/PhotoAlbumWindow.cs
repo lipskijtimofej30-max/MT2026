@@ -1,53 +1,62 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Game.Scripts.Core;
-using Game.Scripts.Service;
 using UnityEngine;
 using Zenject;
 
-namespace Game.Scripts.Quest
+namespace Game.Scripts.CameraPhoto.PhotoAlbum
 {
-    public class QuestJournalUI : TabletWindow
+    public class PhotoAlbumWindow : TabletWindow
     {
         [Header("Settings")]
         [SerializeField] private RectTransform _windowRoot;
-        [SerializeField] private QuestCardUI _cardPrefab;
+        [SerializeField] private PhotoAlbumCardUI _cardPrefab;
         [SerializeField] private Transform _content;
 
-        [Header("Components")]
-        [SerializeField] private CameraCaptureView _cameraCaptureView;
-        [SerializeField] private QuestDetailsPanel _detailsPanel;
-        
         [Header("Animation Settings")]
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private float _showDuration = 0.4f;
         [SerializeField] private float _hideDuration = 0.3f;
         [SerializeField] private Ease _showEase = Ease.OutBack;
-        [SerializeField] private Ease _hideEase = Ease.InBack; 
-
-        private QuestService _service;
+        [SerializeField] private Ease _hideEase = Ease.InBack;
+        
+        private PhotoController _photoController;
+        private PhotoRegistry _photoRegistry;
         
         private Coroutine _currentAnimationCoroutine;
         private bool _isOpen;
 
         [Inject]
-        private void Construct(QuestService service, IAnimalInPhotoProvider photoProvider)
+        private void Construct(PhotoController photoController, PhotoRegistry photoRegistry)
         {
-            _service = service;
-            _detailsPanel.Construct(service, photoProvider, this);
+            _photoController = photoController;
+            _photoRegistry = photoRegistry;
         }
-        
+
+        private void Start()
+        {
+            _photoController.OnPhotoAlbumChanged += RefreshAlbum;
+        }
+
+        private void OnDestroy()
+        {
+            _photoController.OnPhotoAlbumChanged -= RefreshAlbum;
+        }
+
         public override void ToggleWindow()
         {
             _isOpen = !_isOpen;
-            if (_isOpen) Open(); else Close();
+            if (_isOpen) Open();
+            else Close();
         }
 
         public override void SetVisible(bool visible)
         {
             _isOpen = visible;
             gameObject.SetActive(visible);
-
             if (_currentAnimationCoroutine != null)
             {
                 StopCoroutine(_currentAnimationCoroutine);
@@ -60,29 +69,12 @@ namespace Game.Scripts.Quest
                 _windowRoot.localScale = Vector3.one;
                 _canvasGroup.alpha = 1f;
                 Open();
+                RefreshAlbum();
             }
             else
             {
                 _windowRoot.localScale = Vector3.zero;
                 _canvasGroup.alpha = 0f;
-            }
-        }
-
-        public void RefreshJournal()
-        {
-            foreach (Transform child in _content) Destroy(child.gameObject);
-
-            if (_service.CurrentQuest != null)
-            {
-                var card = Instantiate(_cardPrefab, _content);
-                card.Setup(_service.CurrentQuest, _detailsPanel.ShowActive, true);
-            }
-
-            foreach (var quest in _service.AvailableInJournal)
-            {
-                if(quest == null) continue;
-                var card = Instantiate(_cardPrefab, _content);
-                card.Setup(quest, _detailsPanel.ShowAvailable, false);
             }
         }
 
@@ -93,17 +85,8 @@ namespace Game.Scripts.Quest
             _canvasGroup.alpha = 0f;
             _windowRoot.localScale = Vector3.zero;
             _windowRoot.gameObject.SetActive(true);
-
-            RefreshJournal();
             
-            if (_service.CurrentQuest != null)
-            {
-                _detailsPanel.ShowActive(_service.CurrentQuest);
-            } 
-            else
-            {
-                _detailsPanel.gameObject.SetActive(false);
-            }
+            RefreshAlbum();
             
             if (_currentAnimationCoroutine != null) StopCoroutine(_currentAnimationCoroutine);
             DOTween.Kill(_windowRoot);
@@ -121,6 +104,24 @@ namespace Game.Scripts.Quest
                 _currentAnimationCoroutine = StartCoroutine(HideAnimation());
         }
 
+        private void RefreshAlbum()
+        {
+            foreach (Transform child in _content) Destroy(child.gameObject);
+
+            if (_photoController.CurrentPhotoRecord != null)
+            {
+                var card =  Instantiate(_cardPrefab, _content);
+                card.Init(_photoController.CurrentPhotoRecord,_photoController.SetCurrentPhoto, true);
+            }
+
+            foreach (var photo in _photoRegistry.Photos)
+            {
+                if(photo == null) continue;
+                var card = Instantiate(_cardPrefab, _content);
+                card.Init(photo,_photoController.SetCurrentPhoto, false);
+            }
+        }
+        
         private IEnumerator ShowAnimation()
         {
             _windowRoot.localScale = Vector3.zero;
@@ -132,7 +133,7 @@ namespace Game.Scripts.Quest
 
             yield return sequence.WaitForCompletion();
         }
-
+        
         private IEnumerator HideAnimation()
         {
             var sequence = DOTween.Sequence();
@@ -140,8 +141,6 @@ namespace Game.Scripts.Quest
             sequence.Join(_canvasGroup.DOFade(0f, _hideDuration).SetEase(_hideEase));
 
             yield return sequence.WaitForCompletion();
-
-            _detailsPanel.gameObject.SetActive(false);
         }
     }
 }
