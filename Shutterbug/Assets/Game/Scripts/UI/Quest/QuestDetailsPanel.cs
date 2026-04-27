@@ -17,13 +17,13 @@ namespace Game.Scripts.Quest
 
         private PhotoQuest _currentQuest;
         private QuestService _service;
-        private PhotoController _photoController;
+        private PhotoService _photoService;
         private QuestJournalUI _parentJournal;
 
         [Inject]
-        private void Construct(PhotoController photoController)
+        private void Construct(PhotoService photoService)
         {
-            _photoController = photoController;
+            _photoService = photoService;
         }
         
         public void Construct(QuestService service, QuestJournalUI journal)
@@ -65,7 +65,7 @@ namespace Game.Scripts.Quest
 
         private void TryCompleteQuest()
         {
-            PhotoRecord currentPhoto = _photoController.CurrentPhotoRecord;
+            PhotoRecord currentPhoto = _photoService.CurrentPhotoRecord;
 
             if (currentPhoto == null)
             {

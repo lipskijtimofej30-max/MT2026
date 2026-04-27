@@ -10,16 +10,18 @@ namespace Game.Scripts
     {
         private float _minTimeIdle, _maxTimeIdle;
         private RabbitAnimatorModule _animatorModule;
-        private Func<bool> _conditionMet;
+        private Func<bool> _conditionMetToAlert;
+        private Func<bool> _conditionMetToSpecialState;
         public AnimalState StateType => AnimalState.Idle;
 
         /// <summary>
         /// Передавать метод для перехода в состоние Alert
         /// </summary>
-        public IdleState(RabbitAnimatorModule animatorModule, Func<bool> conditionMetToSpecialState,float minTime, float maxTime)
+        public IdleState(RabbitAnimatorModule animatorModule, Func<bool> conditionMetToAlert, Func<bool> conditionMetToSpecialState,float minTime, float maxTime)
         {
             _animatorModule = animatorModule;
-            _conditionMet = conditionMetToSpecialState;
+            _conditionMetToAlert = conditionMetToAlert;
+            _conditionMetToSpecialState = conditionMetToSpecialState;
             _minTimeIdle = minTime;
             _maxTimeIdle = maxTime;
         }
@@ -32,8 +34,10 @@ namespace Game.Scripts
             _animatorModule.StartAnimation(RabbitAnimatorModule.IDLE);
             while (elapsed < duration)
             {
-                if (_conditionMet())
+                if (_conditionMetToAlert())
                     return StateAction.GoToAlert;
+                if(_conditionMetToSpecialState())
+                    return StateAction.GoToSpecialState;
 
                 await UniTask.Delay(100, cancellationToken: ct); 
                 elapsed += 0.1f;

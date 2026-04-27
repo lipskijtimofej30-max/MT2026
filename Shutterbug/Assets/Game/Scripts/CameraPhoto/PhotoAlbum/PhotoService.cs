@@ -5,7 +5,7 @@ using Zenject;
 
 namespace Game.Scripts.CameraPhoto.PhotoAlbum
 {
-    public class PhotoController
+    public class PhotoService
     { 
         private int _maxSlots;
         private PhotoRegistry _photoRegistry;
@@ -34,14 +34,13 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
             return true;
         }
 
-        public void DeletePhoto(int index)
+        public void DeletePhoto(PhotoRecord photo)
         {
-            if (index >= 0 && index < _photoRegistry.Count)
+            if (photo != null &&  _photoRegistry.Count > 0)
             {
-                var record = _photoRegistry.Photos[index];
-                GameObject.Destroy(record.thumbnail);
-                _photoRegistry.Unregister(index);
-                record.thumbnail = null;
+                GameObject.Destroy(photo.thumbnail);
+                _photoRegistry.Unregister(photo);
+                photo.thumbnail = null;
                 OnPhotoAlbumChanged?.Invoke();
             }
         }

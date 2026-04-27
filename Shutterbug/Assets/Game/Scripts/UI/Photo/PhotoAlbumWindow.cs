@@ -21,7 +21,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         [SerializeField] private Ease _showEase = Ease.OutBack;
         [SerializeField] private Ease _hideEase = Ease.InBack;
         
-        private PhotoController _photoController;
+        private PhotoService _photoService;
         private PhotoRegistry _photoRegistry;
         
         private List<PhotoAlbumCardUI> _activeCards = new();
@@ -29,20 +29,20 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         private bool _isOpen;
 
         [Inject]
-        private void Construct(PhotoController photoController, PhotoRegistry photoRegistry)
+        private void Construct(PhotoService photoService, PhotoRegistry photoRegistry)
         {
-            _photoController = photoController;
+            _photoService = photoService;
             _photoRegistry = photoRegistry;
         }
 
         private void Start()
         {
-            _photoController.OnPhotoAlbumChanged += RefreshAlbum;
+            _photoService.OnPhotoAlbumChanged += RefreshAlbum;
         }
 
         private void OnDestroy()
         {
-            _photoController.OnPhotoAlbumChanged -= RefreshAlbum;
+            _photoService.OnPhotoAlbumChanged -= RefreshAlbum;
         }
 
         public override void ToggleWindow()
@@ -109,19 +109,19 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
                 Destroy(card.gameObject);
             _activeCards.Clear();
 
-            if (_photoController.CurrentPhotoRecord != null)
+            if (_photoService.CurrentPhotoRecord != null)
             {
                 var card = Instantiate(_cardPrefab, _content);
-                card.Init(_photoController.CurrentPhotoRecord, _photoController.SetCurrentPhoto, true);
+                card.Initialize(_photoService.CurrentPhotoRecord, _photoService, _photoService.SetCurrentPhoto, true);
                 _activeCards.Add(card);
             }
 
             foreach (var photo in _photoRegistry.Photos)
             {
-                if (photo == null || photo == _photoController.CurrentPhotoRecord) continue; 
+                if (photo == null || photo == _photoService.CurrentPhotoRecord) continue; 
                 var card = Instantiate(_cardPrefab, _content);
-                bool isActive = _photoController.CurrentPhotoRecord == photo;
-                card.Init(photo, _photoController.SetCurrentPhoto, isActive);
+                bool isActive = _photoService.CurrentPhotoRecord == photo;
+                card.Initialize(photo, _photoService, _photoService.SetCurrentPhoto, isActive);
                 _activeCards.Add(card);
             }
         }

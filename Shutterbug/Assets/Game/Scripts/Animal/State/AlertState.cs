@@ -56,13 +56,11 @@ namespace Game.Scripts
                 }
                 else 
                 {
-                    // Если отменила сама стейт-машина (принудительная остановка)
                     throw;
                 }
             }
             finally
             {
-                // Гарантированно плавно опускаем голову перед выходом
                 await _rabbitLookAt.StopLooking(CancellationToken.None); 
             }
 

@@ -41,9 +41,9 @@ namespace Game.Scripts
             _lookAt = GetComponent<RabbitLookAt>();
             _animatorModule = new RabbitAnimatorModule(_animator);
             
-            _idleState = new IdleState(_animatorModule, CanSeePlayer,0.3f, 1f);
+            _idleState = new IdleState(_animatorModule, CanSeePlayer,ShouldFlee,0.3f, 1f);
             _walkState = new WalkState(_agent, _animatorModule, CanSeePlayer, 5f);
-            _fleeState = new FleeState(_agent, _gameMath, _animatorModule, CanSeePlayer);
+            _fleeState = new FleeState(_agent, _gameMath, _animatorModule, ShouldFlee);
             _alertState = new AlertState(_animatorModule, _lookAt, ShouldFlee, 3f,5f);
 
             Dictionary<StateAction, IState> map = new Dictionary<StateAction, IState>
@@ -60,10 +60,8 @@ namespace Game.Scripts
         }
 
         private bool ShouldFlee()
-        {
-            bool check = CanSeePlayer() && _gameMath.DistanceToPlayer(transform) < _distanceToFlee;
-            Debug.Log($"Check should to flee: {check}, can see player {CanSeePlayer()}, distance {_gameMath.DistanceToPlayer(transform) < _distanceToFlee}");
-            return check;
+        { 
+            return _gameMath.DistanceToPlayer(transform) < _distanceToFlee;
         }
 
         private void OnDestroy()

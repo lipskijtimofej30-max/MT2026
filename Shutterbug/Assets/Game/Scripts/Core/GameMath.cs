@@ -5,6 +5,8 @@ using Zenject;
 public class GameMath 
 {
     private PlayerController _player;
+    
+    public Vector3 PlayerPosition => _player.transform.position;
 
     [Inject]
     private void Construct(PlayerController playerController)

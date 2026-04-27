@@ -922,10 +922,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animals:
   - {fileID: 3609184994208708726, guid: 03bd82ec21c714a98b4e0749d8f54e98, type: 3}
-  - {fileID: 3609184994208708726, guid: eaad020ddc30af140a6cfc786fd936c0, type: 3}
   _transformPoint:
   - {fileID: 1964518369}
-  - {fileID: 146744222}
 --- !u!4 &304254483
 Transform:
   m_ObjectHideFlags: 0
@@ -1379,7 +1377,7 @@ Transform:
   m_GameObject: {fileID: 356117272}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 35.1, y: 0, z: 28.3}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -2882,10 +2880,10 @@ MonoBehaviour:
   m_Padding:
     m_Left: 0
     m_Right: -430
-    m_Top: 0
+    m_Top: 30
     m_Bottom: 200
   m_ChildAlignment: 1
-  m_Spacing: 10
+  m_Spacing: 30
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0

@@ -21,17 +21,17 @@ namespace Game.Scripts.CameraPhoto
         private IProgressionService _progressionService;
         private IPhotoProvider _provider;
         private IAnimalInPhotoProvider _animalInPhotoProvider;
-        private PhotoController _photoController;
+        private PhotoService _photoService;
 
         [Inject]
         private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, IProgressionService progressionService,
-            IAnimalInPhotoProvider animalInPhotoProvider, PhotoController photoController)
+            IAnimalInPhotoProvider animalInPhotoProvider, PhotoService photoService)
         {
             _evaluator = evaluator;
             _provider = provider;
             _progressionService = progressionService;
             _animalInPhotoProvider = animalInPhotoProvider;
-            _photoController = photoController;
+            _photoService = photoService;
         }
 
         private void Awake()
@@ -92,7 +92,7 @@ namespace Game.Scripts.CameraPhoto
                 Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState}; Distance to animal {Vector3.Distance(bestTarget.transform.position, virtualCamera.transform.position)} ");
                 _provider.Score = score;
                 
-                _photoController.AddPhoto(new PhotoRecord(data.thumbnail, bestTarget.AnimalType, bestTarget.CurrentState, score,
+                _photoService.AddPhoto(new PhotoRecord(data.thumbnail, bestTarget.AnimalType, bestTarget.CurrentState, score,
                     System.DateTime.Now.ToString("HH:mm:ss"), false));
             }
             else

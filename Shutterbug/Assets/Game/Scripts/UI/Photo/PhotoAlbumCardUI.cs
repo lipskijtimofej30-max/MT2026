@@ -1,10 +1,12 @@
 using System;
+using Game.Scripts.UI.Photo;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Game.Scripts.CameraPhoto.PhotoAlbum
 {
+    [RequireComponent(typeof(ButtonCardDelete))]
     public class PhotoAlbumCardUI : MonoBehaviour
     {
         [SerializeField] private TMP_Text _descriptionText;
@@ -14,12 +16,15 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         
         private PhotoRecord _photoRecord;
         private Action<PhotoRecord> _onSelected;
+        private ButtonCardDelete _deleteButton;
         
+        public PhotoRecord PhotoRecord => _photoRecord;
 
-        public void Init(PhotoRecord photoRecord, Action<PhotoRecord> onSelected, bool isActive = false)
+        public void Initialize(PhotoRecord photoRecord, PhotoService photoService, Action<PhotoRecord> onSelected, bool isActive = false)
         {
             _photoRecord = photoRecord;
             _onSelected = onSelected;
+            _deleteButton = GetComponent<ButtonCardDelete>();
             
             _image.texture = _photoRecord.thumbnail;
             
@@ -34,6 +39,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
             
             _selectedButton.onClick.RemoveAllListeners();
             _selectedButton.onClick.AddListener(() => _onSelected?.Invoke(_photoRecord));
+            _deleteButton.Initialize(photoService);
         }
     }
 }

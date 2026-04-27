@@ -37,7 +37,7 @@ namespace Game.Scripts
         private void BindPhotoAlbum()
         {
             Container.Bind<PhotoRegistry>().AsSingle();
-            Container.Bind<PhotoController>().AsSingle();
+            Container.Bind<PhotoService>().AsSingle();
         }
     }
 }
