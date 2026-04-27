@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 23757994219508936}
   - component: {fileID: 64542318748531676}
   - component: {fileID: 205755823177693686}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: forestpack_roadSign_westEast_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

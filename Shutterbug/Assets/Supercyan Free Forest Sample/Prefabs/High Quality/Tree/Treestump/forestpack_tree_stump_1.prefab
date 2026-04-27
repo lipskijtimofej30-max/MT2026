@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 64726824090031638}
   - component: {fileID: 205512977738328948}
   - component: {fileID: 136712213243828740}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: forestpack_tree_stump_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

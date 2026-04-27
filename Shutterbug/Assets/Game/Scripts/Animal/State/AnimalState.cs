@@ -2,5 +2,6 @@ public enum AnimalState
 {
    Idle,
    Walk,
-   Flee
+   Flee,
+   Alert
 }

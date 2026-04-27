@@ -108,7 +108,7 @@ namespace Game.Scripts.Quest
             if (_currentAnimationCoroutine != null) StopCoroutine(_currentAnimationCoroutine);
             DOTween.Kill(_windowRoot);
             if(gameObject.activeInHierarchy)
-                _currentAnimationCoroutine = StartCoroutine(ShowAnimation());
+                _currentAnimationCoroutine = StartCoroutine(ShowAnimation(_windowRoot, _canvasGroup, _showDuration, _showEase));
         }
 
         private void Close()
@@ -118,30 +118,7 @@ namespace Game.Scripts.Quest
             if (_currentAnimationCoroutine != null) StopCoroutine(_currentAnimationCoroutine);
             DOTween.Kill(_windowRoot);
             if(gameObject.activeInHierarchy)
-                _currentAnimationCoroutine = StartCoroutine(HideAnimation());
-        }
-
-        private IEnumerator ShowAnimation()
-        {
-            _windowRoot.localScale = Vector3.zero;
-            _canvasGroup.alpha = 0f;
-
-            var sequence = DOTween.Sequence();
-            sequence.Join(_windowRoot.DOScale(1f, _showDuration).SetEase(_showEase));
-            sequence.Join(_canvasGroup.DOFade(1f, _showDuration).SetEase(_showEase));
-
-            yield return sequence.WaitForCompletion();
-        }
-
-        private IEnumerator HideAnimation()
-        {
-            var sequence = DOTween.Sequence();
-            sequence.Join(_windowRoot.DOScale(0f, _hideDuration).SetEase(_hideEase));
-            sequence.Join(_canvasGroup.DOFade(0f, _hideDuration).SetEase(_hideEase));
-
-            yield return sequence.WaitForCompletion();
-
-            _detailsPanel.gameObject.SetActive(false);
+                _currentAnimationCoroutine = StartCoroutine(HideAnimation(_windowRoot, _canvasGroup, _hideDuration, _hideEase));
         }
     }
 }

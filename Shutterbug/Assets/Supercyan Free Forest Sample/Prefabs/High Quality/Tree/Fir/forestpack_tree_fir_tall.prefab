@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 64209454658281450}
   - component: {fileID: 205763282677625166}
   - component: {fileID: 136636269291330438}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: forestpack_tree_fir_tall
   m_TagString: Untagged
   m_Icon: {fileID: 0}

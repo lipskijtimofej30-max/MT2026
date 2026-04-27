@@ -5,6 +5,7 @@ namespace Game.Scripts
         Stay,
         GoToIdle,
         GoToWalk,
+        GoToAlert,
         GoToSpecialState
     }
 }

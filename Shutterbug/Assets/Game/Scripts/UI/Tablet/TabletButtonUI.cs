@@ -9,12 +9,13 @@ namespace Game.Scripts.UI
     {
         [SerializeField] private TabletWindow _window;
         [SerializeField] private Button _button;
+        [SerializeField] private bool _enabled = true;
 
         private void Start()
         {
             if (_button == null)
                 _button = GetComponent<Button>();
-            _button.onClick.AddListener(() => _window.SetVisible(true));
+            _button.onClick.AddListener(() => _window.SetVisible(_enabled));
         }
     }
 }

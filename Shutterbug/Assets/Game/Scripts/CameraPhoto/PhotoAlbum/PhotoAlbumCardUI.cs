@@ -26,7 +26,8 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
             _descriptionText.text = $"Животное: {_photoRecord.animalType}" +
                                     $"\nв состояние: {_photoRecord.animalStateType}" + 
                                     $"\nочков: {_photoRecord.photoScore.TotalScore}" +
-                                    $"\n(размер - {_photoRecord.photoScore.SizePoints}, положение - {_photoRecord.photoScore.PlacementPoints}, множитель редкости - {_photoRecord.photoScore.PoseMultiplier})";
+                                    $"\n(размер - {_photoRecord.photoScore.SizePoints}, положение - {_photoRecord.photoScore.PlacementPoints}, множитель редкости - {_photoRecord.photoScore.PoseMultiplier})" +
+                                    $"\nвремя {_photoRecord.timestamp}";
             
             if (_outlineImage != null)
                 _outlineImage.gameObject.SetActive(isActive);

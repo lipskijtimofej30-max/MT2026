@@ -11,7 +11,6 @@ namespace Game.Scripts
     public class WalkState : IState
     {
         private readonly NavMeshAgent _agent;
-        private readonly GameMath _gameMath;
         private readonly RabbitAnimatorModule _animator;
         private readonly Func<bool> _conditionMet;
         private readonly float _radius;
@@ -20,10 +19,9 @@ namespace Game.Scripts
         public AnimalState StateType => AnimalState.Walk;
 
 
-        public WalkState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animator,Func<bool> conditionMet, float radius)
+        public WalkState(NavMeshAgent agent, RabbitAnimatorModule animator, Func<bool> conditionMet, float radius)
         {
             _agent = agent;
-            _gameMath = gameMath;
             _animator = animator;
             _conditionMet = conditionMet;
             _radius = radius;
@@ -33,8 +31,8 @@ namespace Game.Scripts
         {
             if (_conditionMet())
             {
-                Debug.Log("[WalkState] Player inside flee radius immediately, fleeing.");
-                return StateAction.GoToSpecialState;
+                Debug.Log("[WalkState] The player is visible.");
+                return StateAction.GoToAlert;
             }
             
             _agent.speed = 3.5f;
@@ -56,7 +54,7 @@ namespace Game.Scripts
                 if (_conditionMet())
                 {
                     Debug.Log($"[WalkState] Player entered flee radius while walking, fleeing!");
-                    return StateAction.GoToSpecialState;
+                    return StateAction.GoToAlert;
                 }
                 
                 if (Vector3.Distance(_agent.transform.position, lastPos) < 0.01f)

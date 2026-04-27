@@ -19,14 +19,17 @@ namespace Game.Scripts.Service
         [SerializeField] private float _fadeOutDuration = 0.4f;
 
         private IPhotoProvider _photoProvider;
+        private IAnimalInPhotoProvider _animalInPhotoProvider;
         private PlayerController _playerController;
+        
         private Coroutine _currentAnimation;
 
         [Inject]
-        private void Construct(IPhotoProvider photoProvider, PlayerController playerController)
+        private void Construct(IPhotoProvider photoProvider, IAnimalInPhotoProvider animalInPhotoProvider, PlayerController playerController)
         {
             _photoProvider = photoProvider;
             _playerController = playerController;
+            _animalInPhotoProvider = animalInPhotoProvider;
         }
 
         private void Awake()
@@ -54,21 +57,24 @@ namespace Game.Scripts.Service
         {
             if (_currentAnimation != null)
                 StopCoroutine(_currentAnimation);
-            _currentAnimation = StartCoroutine(ShowFlashReveal(texture, score));
+            _currentAnimation = StartCoroutine(ShowFlashReveal(texture, score, _animalInPhotoProvider.LastPhotoData));
         }
 
-        private IEnumerator ShowFlashReveal(Texture2D texture, PhotoScore score)
+        private IEnumerator ShowFlashReveal(Texture2D texture, PhotoScore score, CapturedPhotoData photoData)
         {
             _image.texture = texture;
             _image.gameObject.SetActive(true);
-            _playerController.ToggleController(false);
             _canvasGroup.alpha = 0f;
             
             _playerController.ShakeCamera(0.3f, 1f);
             
             if (_scoreText != null)
             {
-                _scoreText.text = $"Очки: {score.TotalScore}\nРазмер: {score.SizePoints}\nПоложение: {score.PlacementPoints}\nМножитель редкости: {score.PoseMultiplier}";
+                _scoreText.text = $"\n{photoData.AnimalType}, {photoData.AnimalState}" +
+                                  $"\nОчки: {score.TotalScore}" +
+                                  $"\nРазмер: {score.SizePoints}" +
+                                  $"\nПоложение: {score.PlacementPoints}" +
+                                  $"\nМножитель редкости: {score.PoseMultiplier}";
                 _scoreText.gameObject.SetActive(true);
             }
             
@@ -101,7 +107,6 @@ namespace Game.Scripts.Service
 
             _image.gameObject.SetActive(false);
             _scoreText.gameObject.SetActive(false);
-            _playerController.ToggleController(true);
             _currentAnimation = null;
         }
     }

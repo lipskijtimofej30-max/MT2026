@@ -18,4 +18,5 @@ public class UpgradeLevel
     public float maxFOV = 60f;
     public float minFOV = 30f;
     public float captureDistance = 50f;
+    public int maxSlots = 5;
 }

@@ -13,7 +13,9 @@ namespace Game.Scripts
         private Func<bool> _conditionMet;
         public AnimalState StateType => AnimalState.Idle;
 
-
+        /// <summary>
+        /// Передавать метод для перехода в состоние Alert
+        /// </summary>
         public IdleState(RabbitAnimatorModule animatorModule, Func<bool> conditionMetToSpecialState,float minTime, float maxTime)
         {
             _animatorModule = animatorModule;
@@ -31,7 +33,7 @@ namespace Game.Scripts
             while (elapsed < duration)
             {
                 if (_conditionMet())
-                    return StateAction.GoToSpecialState;
+                    return StateAction.GoToAlert;
 
                 await UniTask.Delay(100, cancellationToken: ct); 
                 elapsed += 0.1f;

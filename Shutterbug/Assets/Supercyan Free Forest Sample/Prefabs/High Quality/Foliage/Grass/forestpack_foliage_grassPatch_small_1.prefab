@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33557028928806132}
   - component: {fileID: 23554772125854770}
   - component: {fileID: 205059974874349810}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: forestpack_foliage_grassPatch_small_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

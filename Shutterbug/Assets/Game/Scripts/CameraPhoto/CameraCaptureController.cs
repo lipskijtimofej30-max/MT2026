@@ -40,7 +40,8 @@ namespace Game.Scripts.CameraPhoto
             
             _zoomModule = new CameraZoomModule(virtualCamera, _progressionService);
             _cooldownModule = new CooldownModule(_progressionService);
-            
+                
+            _view.Init(cameraCapture);
             _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
             _cooldownModule.Reset();
         }

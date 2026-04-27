@@ -55,7 +55,7 @@ public class CameraCapture : MonoBehaviour
         return new CapturedData(GetAnimalInFrame(), thumbnail);
     }
 
-    private List<BaseAnimalAI> GetAnimalInFrame()
+    public List<BaseAnimalAI> GetAnimalInFrame()
     {
         List<BaseAnimalAI> result = new List<BaseAnimalAI>();
         var allAnimals = _animalRegistry.Animals;

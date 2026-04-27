@@ -14,11 +14,14 @@ namespace Game.Scripts
         private readonly GameMath _gameMath;
         private readonly RabbitAnimatorModule _animatorModule;
         private readonly Func<bool> _conditionMet;
-        private readonly float _fleeDistance = 8f;
+        private readonly float _fleeDistance = 10f;
         private readonly int _maxAttempts = 10;
         
         public AnimalState StateType => AnimalState.Flee;
         
+        /// <summary>
+        /// Передавать метод для перехода в состоние Alert
+        /// </summary>
         public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule, Func<bool> conditionMet)
         {
             _agent = agent;
@@ -29,6 +32,7 @@ namespace Game.Scripts
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
+            Debug.Log("[FleeState] Entered");
             Vector3 fleeDir = _gameMath.GetDirectionToPlayer(_agent.transform);
             Vector3 desiredPos = _agent.transform.position + fleeDir * _fleeDistance;
             Vector3 target = GetNavMeshPoint(desiredPos);
@@ -41,9 +45,6 @@ namespace Game.Scripts
 
             _agent.speed = 7f;
             _agent.SetDestination(target);
-            
-            if (_conditionMet())
-                return StateAction.Stay;
             
             if (_agent.remainingDistance > 0.1f)
             {

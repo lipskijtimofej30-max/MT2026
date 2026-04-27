@@ -1,12 +1,13 @@
 using System;
+using Game.Scripts.Service;
 using UnityEngine;
 using Zenject;
 
 namespace Game.Scripts.CameraPhoto.PhotoAlbum
 {
-    public class PhotoController :MonoBehaviour
-    {
-        [SerializeField] private int _maxSlots = 20;
+    public class PhotoController
+    { 
+        private int _maxSlots;
         private PhotoRegistry _photoRegistry;
         private PhotoRecord _currentPhotoRecord;
 
@@ -15,9 +16,10 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         public event Action OnPhotoAlbumChanged;
 
         [Inject]
-        private void Construct(PhotoRegistry photoRegistry)
+        private void Construct(PhotoRegistry photoRegistry, IProgressionService progressionService)
         {
             _photoRegistry = photoRegistry;
+            _maxSlots = progressionService.CurrentLevelData.maxSlots;
         }
         
         public bool AddPhoto(PhotoRecord photo)
@@ -37,7 +39,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
             if (index >= 0 && index < _photoRegistry.Count)
             {
                 var record = _photoRegistry.Photos[index];
-                Destroy(record.thumbnail);
+                GameObject.Destroy(record.thumbnail);
                 _photoRegistry.Unregister(index);
                 record.thumbnail = null;
                 OnPhotoAlbumChanged?.Invoke();

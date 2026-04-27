@@ -8,7 +8,6 @@ namespace Game.Scripts
 {
     public class ServiceInstaller : MonoInstaller
     {
-        [SerializeField] private PhotoController _photoController;
         [SerializeField] private CameraUpgradesConfig _cameraConfig;
         [SerializeField] private QuestDatabase _questDatabase;
         override public void InstallBindings()
@@ -38,7 +37,7 @@ namespace Game.Scripts
         private void BindPhotoAlbum()
         {
             Container.Bind<PhotoRegistry>().AsSingle();
-            Container.Bind<PhotoController>().FromInstance(_photoController).AsSingle();
+            Container.Bind<PhotoController>().AsSingle();
         }
     }
 }
