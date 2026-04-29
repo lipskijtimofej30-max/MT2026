@@ -16,6 +16,7 @@ namespace Game.Scripts
         [SerializeField] private float rotationSmoothTime = 0.12f;
         [SerializeField] private float gravity = -9.81f;
         [SerializeField] private float jumpHeight = 1.2f;
+        [SerializeField] private float crouchSpeed = 4f;
         
         [Header("Jump Settings")]
         [SerializeField] private bool canJump = true;
@@ -33,12 +34,16 @@ namespace Game.Scripts
         private float targetRotation;
         private float rotationVelocity;
         private bool isGrounded;
+        private float scaleY;
         private CinemachineBasicMultiChannelPerlin cinemachineNoise;
+        private bool isCrouched;
+        public bool IsCrouched { get => isCrouched; set => isCrouched = value; }
 
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
             currentSpeed = moveSpeed;
+            scaleY = gameObject.transform.localScale.y;
             
             if (Camera.main != null) 
                 cameraTransform = Camera.main.transform;
@@ -69,9 +74,26 @@ namespace Game.Scripts
 
         private void Update()
         {
+            HandleCrouch();
             HandleMovementInput();
             HandleGravityAndJump();
             ApplyFinalMovement();
+        }
+
+        private void HandleCrouch()
+        {
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                isCrouched = true;
+                currentSpeed = crouchSpeed;
+                gameObject.transform.DOScaleY(scaleY/2, 0.2f);
+            }
+            else
+            {
+                isCrouched = false;
+                currentSpeed = moveSpeed;
+                gameObject.transform.DOScaleY(scaleY, 0.2f);
+            }
         }
 
         private void HandleMovementInput()

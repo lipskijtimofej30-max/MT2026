@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Game.Scripts.Module;
@@ -12,76 +11,113 @@ namespace Game.Scripts
         private readonly NavMeshAgent _agent;
         private readonly GameMath _gameMath;
         private readonly RabbitAnimatorModule _animatorModule;
-        private readonly Func<bool> _conditionMet;
-        private readonly float _fleeDistance = 3f;
-        private readonly int _maxAttempts = 20;
         
+        // Значительно увеличиваем дистанцию одного забега, чтобы ИИ не дергался
+        private readonly float _runPointDistance = 12f; 
+        private readonly float _safeDistance = 15f; // На каком расстоянии животное считает себя в безопасности
+
         public AnimalState StateType => AnimalState.Flee;
         
-        /// <summary>
-        /// Передавать метод для перехода в состоние Alert
-        /// </summary>
-        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule, Func<bool> conditionMet)
+        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule)
         {
             _agent = agent;
             _gameMath = gameMath;
             _animatorModule = animatorModule;
-            _conditionMet = conditionMet;
         }
 
-       public async UniTask<StateAction> OnEnter(CancellationToken ct)
-{
-        Vector3 toPlayer = _gameMath.GetDirectionToPlayer(_agent.transform);
-        Vector3 fleeDir = toPlayer.normalized;
-
-        _agent.speed = 10f;
-        _animatorModule.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
-
-        Vector3 target = GetValidFleePoint(_agent.transform.position + fleeDir * _fleeDistance, fleeDir);
-        if (target != Vector3.zero) _agent.SetDestination(target);
-
-        while (!ct.IsCancellationRequested)
+        public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
-            float distToPlayer = Vector3.Distance(_agent.transform.position, _gameMath.PlayerPosition);
-            
-            if (distToPlayer > _fleeDistance*2) 
-            {
-                if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
-                {
-                    Debug.Log("Заяц в безопасности, переходим в Idle");
-                    return StateAction.GoToIdle;
-                }
-            }
+            _agent.speed = 10f;
+            _agent.angularSpeed = 400f; 
+            _agent.acceleration = 50f;
+            _animatorModule.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
 
-            if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
+            // Ищем первую точку для побега
+            SetNewFleeDestination();
+
+            while (!ct.IsCancellationRequested)
             {
-                if (distToPlayer < 6f)
+                float distToPlayer = Vector3.Distance(_agent.transform.position, _gameMath.PlayerPosition);
+                
+                // 1. Проверка на безопасность: если убежали достаточно далеко
+                if (distToPlayer > _safeDistance) 
                 {
-                    Debug.Log("Точка достигнута, но игрок близко. Ищем новую точку.");
-                    Vector3 nextTarget = GetValidFleePoint(_agent.transform.position + fleeDir * _fleeDistance, fleeDir);
-                    if (nextTarget != Vector3.zero) _agent.SetDestination(nextTarget);
+                    // Ждем, пока добежит до последней заданной точки, чтобы остановка была плавной
+                    if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.5f)
+                    {
+                        Debug.Log("[FleeState] Животное в безопасности, переходим в Idle");
+                        return StateAction.GoToIdle;
+                    }
+                }
+                else
+                {
+                    // 2. Игрок всё ещё близко. Проверяем, добежали ли мы до точки побега
+                    if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 1f)
+                    {
+                        Debug.Log("[FleeState] Точка достигнута, игрок всё ещё рядом. Ищем новую точку.");
+                        SetNewFleeDestination();
+                    }
+                    else
+                    {
+                        // 3. Защита от перехвата: если мы бежим, но вектор нашего движения направлен В СТОРОНУ игрока
+                        Vector3 currentDirToPlayer = (_gameMath.PlayerPosition - _agent.transform.position).normalized;
+                        Vector3 currentMoveDir = _agent.velocity.normalized;
+                        
+                        // Если угол между скоростью и направлением на игрока острый (мы бежим к нему)
+                        if (_agent.velocity.sqrMagnitude > 0.1f && Vector3.Dot(currentMoveDir, currentDirToPlayer) > 0.3f)
+                        {
+                            Debug.Log("[FleeState] Игрок перерезал путь! Экстренно меняем направление.");
+                            SetNewFleeDestination();
+                        }
+                    }
+                }
+                
+                await UniTask.Yield(ct);
+            }
+            return StateAction.GoToIdle;
+        }
+
+        private void SetNewFleeDestination()
+        {
+            // Строго вектор ОТ игрока на текущий момент (а не старый сохраненный)
+            Vector3 fleeDir = (_agent.transform.position - _gameMath.PlayerPosition).normalized;
+            fleeDir.y = 0; 
+
+            Vector3 target = GetValidFleePoint(_agent.transform.position + fleeDir * _runPointDistance, fleeDir);
+            
+            if (target != Vector3.zero) 
+            {
+                _agent.SetDestination(target);
+            }
+            else
+            {
+                // Защита от тупика: Если зажали в углу (прямых точек нет), бежим в случайную сторону
+                Vector3 randomDir = Quaternion.Euler(0, UnityEngine.Random.Range(-90f, 90f), 0) * fleeDir;
+                Vector3 fallbackTarget = _agent.transform.position + randomDir * (_runPointDistance / 2f);
+                if (NavMesh.SamplePosition(fallbackTarget, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+                {
+                    _agent.SetDestination(hit.position);
                 }
             }
-            await UniTask.Yield(ct);
         }
-        return StateAction.GoToIdle;
-    }
+
         private Vector3 GetValidFleePoint(Vector3 desiredPoint, Vector3 currentFleeDir)
         {
-            if (NavMesh.SamplePosition(desiredPoint, out NavMeshHit hit, 3.5f, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(desiredPoint, out NavMeshHit hit, 4f, NavMesh.AllAreas))
             {
                 if (!IsObstacleBetween(_agent.transform.position, hit.position))
                     return hit.position;
             }
             
-            for (int angle = 15; angle <= 90; angle += 15)
+            // Расширяем поиск углов: пытаемся найти обходные пути, увеличивая угол
+            for (int angle = 20; angle <= 120; angle += 20)
             {
                 foreach (int side in new int[] { 1, -1 })
                 {
                     Vector3 rotatedDir = Quaternion.AngleAxis(angle * side, Vector3.up) * currentFleeDir;
-                    Vector3 potentialPos = _agent.transform.position + rotatedDir * _fleeDistance;
+                    Vector3 potentialPos = _agent.transform.position + rotatedDir * _runPointDistance;
 
-                    if (NavMesh.SamplePosition(potentialPos, out hit, 2f, NavMesh.AllAreas))
+                    if (NavMesh.SamplePosition(potentialPos, out hit, 3f, NavMesh.AllAreas))
                     {
                         if (!IsObstacleBetween(_agent.transform.position, hit.position))
                         {
@@ -90,15 +126,18 @@ namespace Game.Scripts
                     }
                 }
             }
-    
             return Vector3.zero;
         }
 
         private bool IsObstacleBetween(Vector3 from, Vector3 to)
         {
-            Vector3 direction = to - from;
+            // КРИТИЧНОЕ ИСПРАВЛЕНИЕ: Поднимаем луч на 0.5f от земли, чтобы не цеплять пол и мелкие кочки!
+            Vector3 startPos = from + Vector3.up * 0.5f; 
+            Vector3 endPos = to + Vector3.up * 0.5f;
+            Vector3 direction = endPos - startPos;
             float distance = direction.magnitude;
-            if (Physics.Raycast(from, direction.normalized, out RaycastHit hit, distance))
+            
+            if (Physics.Raycast(startPos, direction.normalized, out RaycastHit hit, distance))
             {
                 return hit.collider.gameObject.layer == LayerMask.NameToLayer("Obstacle");
             }

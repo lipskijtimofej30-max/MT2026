@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class CameraCaptureView : MonoBehaviour
 {
     [SerializeField] private Image cameraUI;
+    [SerializeField] private TMP_Text cooldownText;
     [SerializeField] private TMP_Text infoText;
     
     private CameraCapture _cameraCapture;
@@ -15,6 +16,7 @@ public class CameraCaptureView : MonoBehaviour
     
     private void Start()
     {
+        infoText.text = "";
         cameraUI.gameObject.SetActive(false);
     }
 
@@ -31,12 +33,14 @@ public class CameraCaptureView : MonoBehaviour
 
     public void UpdateTimerDisplay(float cooldown)
     {
-        if (infoText == null) return;
+        if (cooldownText == null) return;
         int displayValue = Mathf.CeilToInt(cooldown);
         if (displayValue != lastDisplayedTime)
         {
             lastDisplayedTime = displayValue;
-            infoText.text = $"{displayValue.ToString()}";
+            cooldownText.text = $"{displayValue.ToString()}";
         }
     }
+    
+    public void SetInfoText(string info) => infoText.text = info;
 }

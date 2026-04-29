@@ -92,7 +92,7 @@ public class CameraCapture : MonoBehaviour
         
         Vector3 targetPoint = animal.transform.position + Vector3.up * 0.5f; 
         Vector3 rayDirection = targetPoint - camera.transform.position;
-        var objs = Physics.SphereCastAll(camera.transform.position, 0.5f, rayDirection, distance + 1f);
+        var objs = Physics.SphereCastAll(camera.transform.position, 0.1f, rayDirection, distance + 1f);
         for (int i = 0; i < 5; i++)
         {
             var obj = objs[i];

@@ -43,7 +43,7 @@ namespace Game.Scripts
             
             _idleState = new IdleState(_animatorModule, CanSeePlayer,ShouldFlee,0.3f, 1f);
             _walkState = new WalkState(_agent, _animatorModule, CanSeePlayer, 5f);
-            _fleeState = new FleeState(_agent, _gameMath, _animatorModule, ShouldFlee);
+            _fleeState = new FleeState(_agent, _gameMath, _animatorModule);
             _alertState = new AlertState(_animatorModule, _lookAt, ShouldFlee, 3f,5f);
 
             Dictionary<StateAction, IState> map = new Dictionary<StateAction, IState>

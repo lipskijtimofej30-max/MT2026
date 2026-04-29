@@ -12,7 +12,9 @@ namespace Game.Scripts.CameraPhoto
     {
         [SerializeField] private CameraCapture cameraCapture;
         [SerializeField] private CinemachineVirtualCamera virtualCamera;
-
+        private Camera _mainCamera;
+        private LayerMask _layerMask;
+        
         private CameraCaptureView _view;
         private CameraZoomModule _zoomModule;
         private CooldownModule _cooldownModule;
@@ -37,6 +39,8 @@ namespace Game.Scripts.CameraPhoto
         private void Awake()
         {
             _view = GetComponent<CameraCaptureView>();
+            _mainCamera = Camera.main;
+            _layerMask = LayerMask.GetMask("Animal");
             
             _zoomModule = new CameraZoomModule(virtualCamera, _progressionService);
             _cooldownModule = new CooldownModule(_progressionService);
@@ -66,11 +70,25 @@ namespace Game.Scripts.CameraPhoto
             
             _cooldownModule.Progress(Time.deltaTime);
             _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
+            Ray ray = _mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
+            if (Physics.Raycast(ray, out RaycastHit hit, _progressionService.CurrentLevelData.captureDistance, _layerMask))
+            {
+                if (hit.collider.TryGetComponent(out BaseAnimalAI animal))
+                {
+                    _view.SetInfoText($"{animal.AnimalType},  {animal.CurrentState}");
+                }
+            }
+            else
+            {
+                _view.SetInfoText("");
+            }
+            
             if (_cooldownModule.IsReady && Input.GetKeyDown(KeyCode.E))
             {
                 ExecuteCapture().Forget();
             }
+
         }
 
         private async UniTaskVoid ExecuteCapture()

@@ -16,10 +16,7 @@ namespace Game.Scripts.Module
 
         public void StartAnimation(int index = 0)
         {
-            _animator.SetInteger("AnimIndex", index);
-            NextAnimation();
+            _animator.SetFloat("AnimIndex", index);
         }
-        
-        private void NextAnimation() => _animator.SetTrigger("Next");
     }
 }
