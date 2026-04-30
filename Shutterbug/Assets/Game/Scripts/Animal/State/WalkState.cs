@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Data;
 using Game.Scripts.Module;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,12 +20,12 @@ namespace Game.Scripts
         public AnimalState StateType => AnimalState.Walk;
 
 
-        public WalkState(NavMeshAgent agent, RabbitAnimatorModule animator, Func<bool> conditionMet, float radius)
+        public WalkState(NavMeshAgent agent, RabbitAnimatorModule animator, Func<bool> conditionMet, AnimalConfig config)
         {
             _agent = agent;
             _animator = animator;
             _conditionMet = conditionMet;
-            _radius = radius;
+            _radius = config.WalkRadius;
         }
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
@@ -34,7 +35,6 @@ namespace Game.Scripts
                 Debug.Log("[WalkState] The player is visible.");
                 return StateAction.GoToAlert;
             }
-            
             _agent.speed = 3.5f;
             Vector3 target = GetRandomNavMeshPoint(_agent.transform.position, _radius);
             if (target == Vector3.zero)

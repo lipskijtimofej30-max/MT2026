@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Data;
 using Game.Scripts.Module;
 using Random = UnityEngine.Random;
 
@@ -17,13 +18,13 @@ namespace Game.Scripts
         /// <summary>
         /// Передавать метод для перехода в состоние Alert
         /// </summary>
-        public IdleState(RabbitAnimatorModule animatorModule, Func<bool> conditionMetToAlert, Func<bool> conditionMetToSpecialState,float minTime, float maxTime)
+        public IdleState(RabbitAnimatorModule animatorModule, Func<bool> conditionMetToAlert, Func<bool> conditionMetToSpecialState,AnimalConfig config)
         {
             _animatorModule = animatorModule;
             _conditionMetToAlert = conditionMetToAlert;
             _conditionMetToSpecialState = conditionMetToSpecialState;
-            _minTimeIdle = minTime;
-            _maxTimeIdle = maxTime;
+            _minTimeIdle = config.IdleTime.Min;
+            _maxTimeIdle = config.IdleTime.Max;
         }
         
         public async UniTask<StateAction> OnEnter(CancellationToken ct)

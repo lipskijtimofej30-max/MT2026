@@ -1,5 +1,6 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Data;
 using Game.Scripts.Module;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,18 +13,17 @@ namespace Game.Scripts
         private readonly GameMath _gameMath;
         private readonly RabbitAnimatorModule _animatorModule;
         
-        // Значительно увеличиваем дистанцию одного забега, чтобы ИИ не дергался
         private readonly float _runPointDistance = 12f; 
         private readonly float _safeDistance;
 
         public AnimalState StateType => AnimalState.Flee;
         
-        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule, float runPointDistance)
+        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule, AnimalConfig config)
         {
             _agent = agent;
             _gameMath = gameMath;
             _animatorModule = animatorModule;
-            _runPointDistance = runPointDistance;
+            _runPointDistance = config.ToSpecialStateDistance;
             _safeDistance = _runPointDistance + 3f;
         }
 

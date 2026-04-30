@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Scripts.Core
 {
-    public static class Texture2dExtensions
+    public static class Texture2DExtensions
     {
         public static Texture2D ResizeTexture(this Texture2D texture2D, int newWidth, int newHeight)
         {

@@ -9,6 +9,7 @@ namespace Game.Core
         {
             SignalBusInstaller.Install(Container);
             Container.DeclareSignal<PlayerCrouchedSignal>().OptionalSubscriber();
+            Container.DeclareSignal<LevelChangeSignal>().OptionalSubscriber();
         }
     }
 }

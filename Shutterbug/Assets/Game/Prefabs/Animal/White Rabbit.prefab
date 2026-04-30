@@ -637,8 +637,8 @@ GameObject:
   - component: {fileID: 8463192694943787655}
   - component: {fileID: 5274202644014786026}
   - component: {fileID: 3609184994208708726}
-  - component: {fileID: 1906246147752415679}
   - component: {fileID: 2860408626354856699}
+  - component: {fileID: 1906246147752415679}
   m_Layer: 7
   m_Name: White Rabbit
   m_TagString: Untagged
@@ -743,20 +743,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _agent: {fileID: 5274202644014786026}
   _animator: {fileID: 7436886174195804047}
+  _config: {fileID: 11400000, guid: cefc1452e47864f5ca6f612119c14d2c, type: 2}
   _animalType: 0
-  _dataBase:
-    DistanceToFlee: 4
-    ViewAngle: 105
-    EyeHeight: 0.5
-    ViewDistance: 10
-  _dataCrouched:
-    DistanceToFlee: 3
-    ViewAngle: 85
-    EyeHeight: 0.5
-    ViewDistance: 7
   _obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
+  _eyeHeight: 0.5
+--- !u!114 &2860408626354856699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5105517655633449633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1fc544a4c0f5f54093b77ecb94cc512, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lookAtRig: {fileID: 6670187461169255388}
+  lookAtTarget: {fileID: 2873626439612483249}
+  transitionSpeed: 2
 --- !u!114 &1906246147752415679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -773,21 +780,6 @@ MonoBehaviour:
   - m_Rig: {fileID: 6670187461169255388}
     m_Active: 1
   m_Effectors: []
---- !u!114 &2860408626354856699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5105517655633449633}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1fc544a4c0f5f54093b77ecb94cc512, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lookAtRig: {fileID: 6670187461169255388}
-  lookAtTarget: {fileID: 2873626439612483249}
-  transitionSpeed: 2
 --- !u!1 &5383565749570273261
 GameObject:
   m_ObjectHideFlags: 0

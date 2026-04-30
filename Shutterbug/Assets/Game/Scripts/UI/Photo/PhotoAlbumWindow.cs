@@ -1,12 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Game.Scripts.Core;
+using Game.Scripts.UI.Photo;
 using UnityEngine;
 using Zenject;
 
 namespace Game.Scripts.CameraPhoto.PhotoAlbum
 {
+    [RequireComponent(typeof(CountCardAlbumUI))]
     public class PhotoAlbumWindow : TabletWindow
     {
         [Header("Settings")]

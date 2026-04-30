@@ -1,3 +1,4 @@
+using Game.Data;
 using Game.Scripts;
 using Game.Scripts.CameraPhoto;
 using Game.Scripts.Core;
@@ -19,6 +20,8 @@ public class GameInstaller : MonoInstaller
     public override void InstallBindings()
     {
         Container.Bind<PlayerController>().FromInstance(_playerController);
+        Container.BindInterfacesAndSelfTo<AnimalDataRegistry>().AsSingle();
+        
         BindGame();
         BindGameState();
         BindUI();

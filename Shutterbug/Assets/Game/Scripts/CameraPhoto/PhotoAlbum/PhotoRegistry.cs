@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,8 +10,19 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         public IReadOnlyList<PhotoRecord> Photos => _photos;
         public int Count => _photos.Count;
         
-        public void Register(PhotoRecord photoRecord) => _photos.Add(photoRecord);
-        public void Unregister(PhotoRecord photoRecord) => _photos.Remove(photoRecord);
+        public event Action<int> OnCountChanged;
+
+        public void Register(PhotoRecord photoRecord)
+        {
+            _photos.Add(photoRecord);
+            OnCountChanged?.Invoke(Count);
+        }
+
+        public void Unregister(PhotoRecord photoRecord)
+        {
+            _photos.Remove(photoRecord);
+            OnCountChanged?.Invoke(Count);
+        }
         public void Unregister(int index) => _photos.RemoveAt(index);
 
     }

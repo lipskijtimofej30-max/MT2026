@@ -8,6 +8,5 @@ namespace Game.Scripts.Service
         UpgradeLevel CurrentLevelData { get; }
         void LevelUp(UpgradeLevel level);
         void LevelDown(UpgradeLevel level);
-        event Action<int> OnLevelChanged;
     }
 }

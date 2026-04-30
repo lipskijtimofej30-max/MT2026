@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Game.Data;
 using Game.Scripts.Module;
 using UnityEngine;
 
@@ -11,29 +12,27 @@ namespace Game.Scripts
         private readonly RabbitAnimatorModule _animatorModule;
         private readonly RabbitLookAt _rabbitLookAt;
         private readonly Func<bool> _conditionMet;
-        private readonly float _minTime, _maxTime;
+        private readonly RabbitConfig _config;
         public AnimalState StateType => AnimalState.Alert;
 
-        public AlertState(RabbitAnimatorModule animatorModule, RabbitLookAt rabbitLookAt, Func<bool> conditionMetToSpecialState, float minTime, float maxTime)
+        public AlertState(RabbitAnimatorModule animatorModule, RabbitLookAt rabbitLookAt,
+            Func<bool> conditionMetToSpecialState, RabbitConfig config)
         {
             _animatorModule = animatorModule;
             _conditionMet = conditionMetToSpecialState;
-            _minTime = minTime;
-            _maxTime = maxTime;
             _rabbitLookAt = rabbitLookAt;
+            _config = config;
         }
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
             Debug.Log("[AlertState] Зашли в состояние Alert");
             
-            // Запускаем поворот головы в фоне и забываем (Forget), чтобы не было предупреждений
             _rabbitLookAt.StartLooking(ct).Forget();
             
             _animatorModule.StartAnimation(RabbitAnimatorModule.IDLE);
     
-            // Создаем токен, который сам отменится через случайное время (тайм-аут)
-            float waitTime = UnityEngine.Random.Range(_minTime, _maxTime);
+            float waitTime = UnityEngine.Random.Range(_config.AlertTime.Min, _config.AlertTime.Max);
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             timeoutCts.CancelAfterSlim(TimeSpan.FromSeconds(waitTime));
 
@@ -41,15 +40,12 @@ namespace Game.Scripts
 
             try
             {
-                // Ждем, пока игрок не подойдет близко (ShouldFlee) ИЛИ пока не выйдет время
                 await UniTask.WaitUntil(() => _conditionMet(), cancellationToken: timeoutCts.Token);
                 
-                // Если код дошел сюда без ошибки отмены, значит условие выполнилось до истечения времени!
                 nextAction = StateAction.GoToSpecialState; // Убегаем
             }
             catch (OperationCanceledException)
             {
-                // Если StateMachine не отменяли, значит сработал наш тайм-аут
                 if (!ct.IsCancellationRequested) 
                 {
                     nextAction = StateAction.GoToIdle; // Время вышло, успокаиваемся
