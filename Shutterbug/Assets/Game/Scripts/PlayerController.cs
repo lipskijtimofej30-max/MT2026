@@ -1,7 +1,9 @@
 using System;
 using Cinemachine;
 using DG.Tweening;
+using Game.Signals;
 using UnityEngine;
+using Zenject;
 
 namespace Game.Scripts
 {
@@ -28,22 +30,31 @@ namespace Game.Scripts
         [SerializeField] private float shakeStrength = 1f;
         [SerializeField] private int shakeVibrato = 10;
         
-        private Vector3 moveDirection;
-        private Vector3 velocity;
-        private float currentSpeed;
-        private float targetRotation;
-        private float rotationVelocity;
-        private bool isGrounded;
-        private float scaleY;
-        private CinemachineBasicMultiChannelPerlin cinemachineNoise;
-        private bool isCrouched;
-        public bool IsCrouched { get => isCrouched; set => isCrouched = value; }
+        private SignalBus _signalBus;
+        
+        private Vector3 _moveDirection;
+        private Vector3 _velocity;
+        private float _currentSpeed;
+        private float _targetRotation;
+        private float _rotationVelocity;
+        private bool _isGrounded;
+        private float _scaleY;
+        private CinemachineBasicMultiChannelPerlin _cinemachineNoise;
+        private bool _isCrouched;
+        public bool IsCrouched { get => _isCrouched; set => _isCrouched = value; }
+
+        [Inject]
+        private void Construct(SignalBus signalBus)
+        {
+            _signalBus = signalBus;
+        }
+
 
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
-            currentSpeed = moveSpeed;
-            scaleY = gameObject.transform.localScale.y;
+            _currentSpeed = moveSpeed;
+            _scaleY = gameObject.transform.localScale.y;
             
             if (Camera.main != null) 
                 cameraTransform = Camera.main.transform;
@@ -52,8 +63,8 @@ namespace Game.Scripts
             
             if (virtualCamera != null)
             {
-                cinemachineNoise = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-                if (cinemachineNoise == null)
+                _cinemachineNoise = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+                if (_cinemachineNoise == null)
                     Debug.LogWarning("CinemachineBasicMultiChannelPerlin not found on virtual camera. Camera shake will use DoTween fallback.");
             }
             else
@@ -82,17 +93,24 @@ namespace Game.Scripts
 
         private void HandleCrouch()
         {
-            if (Input.GetKey(KeyCode.LeftControl))
+            try
             {
-                isCrouched = true;
-                currentSpeed = crouchSpeed;
-                gameObject.transform.DOScaleY(scaleY/2, 0.2f);
+                if (Input.GetKey(KeyCode.LeftControl))
+                {
+                    _isCrouched = true;
+                    _currentSpeed = crouchSpeed;
+                    gameObject.transform.DOScaleY(_scaleY/2, 0.2f);
+                }
+                else
+                {
+                    _isCrouched = false;
+                    _currentSpeed = moveSpeed;
+                    gameObject.transform.DOScaleY(_scaleY, 0.2f);
+                }
             }
-            else
+            finally
             {
-                isCrouched = false;
-                currentSpeed = moveSpeed;
-                gameObject.transform.DOScaleY(scaleY, 0.2f);
+                _signalBus.Fire(new PlayerCrouchedSignal(_isCrouched));
             }
         }
 
@@ -110,34 +128,34 @@ namespace Game.Scripts
 
             Vector3 desiredMoveDirection = (camForward * vertical + camRight * horizontal).normalized;
     
-            moveDirection = desiredMoveDirection;
+            _moveDirection = desiredMoveDirection;
         }
 
         private void HandleGravityAndJump()
         {
-            isGrounded = controller.isGrounded;
-            if (isGrounded && velocity.y < 0)
+            _isGrounded = controller.isGrounded;
+            if (_isGrounded && _velocity.y < 0)
             {
-                velocity.y = -2f; // Прижимаем к земле
+                _velocity.y = -2f; // Прижимаем к земле
             }
 
             // Обработка прыжка (клавиша Space по умолчанию)
-            if (canJump && Input.GetButtonDown("Jump") && isGrounded)
+            if (canJump && Input.GetButtonDown("Jump") && _isGrounded)
             {
-                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                _velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
                 ShakeCamera(0.15f, 0.5f); // небольшая тряска при прыжке
             }
 
             // Гравитация
-            velocity.y += gravity * Time.deltaTime;
+            _velocity.y += gravity * Time.deltaTime;
         }
 
         private void ApplyFinalMovement()
         {
 
-            Vector3 horizontalMovement = moveDirection * (currentSpeed * Time.deltaTime);
+            Vector3 horizontalMovement = _moveDirection * (_currentSpeed * Time.deltaTime);
             controller.Move(horizontalMovement);
-            controller.Move(velocity * Time.deltaTime);
+            controller.Move(_velocity * Time.deltaTime);
         }
 
         /// <summary>
@@ -148,16 +166,15 @@ namespace Game.Scripts
             if (virtualCamera == null) return;
             
             // Используем шум Cinemachine если он есть
-            if (cinemachineNoise != null)
+            if (_cinemachineNoise != null)
             {
-                cinemachineNoise.m_AmplitudeGain = strength;
-                DOTween.To(() => cinemachineNoise.m_AmplitudeGain, x => cinemachineNoise.m_AmplitudeGain = x, 0f, duration)
+                _cinemachineNoise.m_AmplitudeGain = strength;
+                DOTween.To(() => _cinemachineNoise.m_AmplitudeGain, x => _cinemachineNoise.m_AmplitudeGain = x, 0f, duration)
                     .SetEase(Ease.OutQuad)
-                    .OnComplete(() => cinemachineNoise.m_AmplitudeGain = 0f);
+                    .OnComplete(() => _cinemachineNoise.m_AmplitudeGain = 0f);
             }
             else
             {
-                // Fallback: трясём позицию камеры через DoTween
                 virtualCamera.transform.DOShakePosition(duration, strength, shakeVibrato).SetUpdate(true);
             }
         }
@@ -167,6 +184,5 @@ namespace Game.Scripts
             virtualCamera.enabled = toggle;
             enabled = toggle;
         }
-
     }
 }

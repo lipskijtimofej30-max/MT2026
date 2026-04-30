@@ -74,7 +74,7 @@ namespace Game.Scripts.CameraPhoto
 
             if (Physics.Raycast(ray, out RaycastHit hit, _progressionService.CurrentLevelData.captureDistance, _layerMask))
             {
-                if (hit.collider.TryGetComponent(out BaseAnimalAI animal))
+                if (hit.collider.TryGetComponent(out BaseAnimalBrain animal))
                 {
                     _view.SetInfoText($"{animal.AnimalType},  {animal.CurrentState}");
                 }

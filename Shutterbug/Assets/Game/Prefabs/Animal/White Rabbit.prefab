@@ -744,10 +744,16 @@ MonoBehaviour:
   _agent: {fileID: 5274202644014786026}
   _animator: {fileID: 7436886174195804047}
   _animalType: 0
-  _distanceToFlee: 4
-  viewAngle: 120
-  eyeHeight: 0.5
-  viewDistance: 10
+  _dataBase:
+    DistanceToFlee: 4
+    ViewAngle: 105
+    EyeHeight: 0.5
+    ViewDistance: 10
+  _dataCrouched:
+    DistanceToFlee: 3
+    ViewAngle: 85
+    EyeHeight: 0.5
+    ViewDistance: 7
   _obstacleLayer:
     serializedVersion: 2
     m_Bits: 64

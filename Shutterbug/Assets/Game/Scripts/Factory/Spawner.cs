@@ -7,7 +7,7 @@ namespace Game.Scripts
 {
     public class Spawner : MonoBehaviour
     {
-        [SerializeField] private List<BaseAnimalAI> _animals = new();
+        [SerializeField] private List<BaseAnimalBrain> _animals = new();
         [SerializeField] private List<Transform> _transformPoint;
         private IAnimalFactory _animalFactory;
 

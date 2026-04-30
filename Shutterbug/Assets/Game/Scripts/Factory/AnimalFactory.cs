@@ -17,9 +17,9 @@ namespace Game.Scripts.Factory
             _animalRegistry = animalRegistry;
         }
 
-        public BaseAnimalAI Spawn(Vector3 position, BaseAnimalAI prefab)
+        public BaseAnimalBrain Spawn(Vector3 position, BaseAnimalBrain prefab)
         {
-            var obj = _container.InstantiatePrefabForComponent<BaseAnimalAI>(prefab.gameObject, position, Quaternion.identity, transform);
+            var obj = _container.InstantiatePrefabForComponent<BaseAnimalBrain>(prefab.gameObject, position, Quaternion.identity, transform);
             _animalRegistry.Register(obj);
             Debug.Log($"Spawn animal: {obj.name}");
             return obj;

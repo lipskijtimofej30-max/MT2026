@@ -4,10 +4,10 @@ namespace Game.Scripts.Factory
 {
     public class AnimalRegistry
     {
-        private List<BaseAnimalAI> _animals = new();
-        public IReadOnlyList<BaseAnimalAI> Animals => _animals;
+        private List<BaseAnimalBrain> _animals = new();
+        public IReadOnlyList<BaseAnimalBrain> Animals => _animals;
         
-        public void Register(BaseAnimalAI animal) => _animals.Add(animal);
-        public void Unregister(BaseAnimalAI animal) => _animals.Remove(animal);
+        public void Register(BaseAnimalBrain animal) => _animals.Add(animal);
+        public void Unregister(BaseAnimalBrain animal) => _animals.Remove(animal);
     }
 }

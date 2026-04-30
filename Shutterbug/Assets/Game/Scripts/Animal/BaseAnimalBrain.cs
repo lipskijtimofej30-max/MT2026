@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Scripts
 {
-    public abstract class BaseAnimalAI : MonoBehaviour
+    public abstract class BaseAnimalBrain : MonoBehaviour
     {
         protected StateMachine _stateMachine;
         public StateMachine StateMachine => _stateMachine;

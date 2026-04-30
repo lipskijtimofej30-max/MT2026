@@ -15,7 +15,7 @@ public class CameraCapture : MonoBehaviour
     [SerializeField] private TextureSize _captureSize;
     [SerializeField] private TextureSize _thumbnailSize;
     
-    private BaseAnimalAI animalAI;
+    private BaseAnimalBrain _animalBrain;
     
     private IPhotoProvider _photoProvider;
     private AnimalRegistry _animalRegistry;
@@ -55,9 +55,9 @@ public class CameraCapture : MonoBehaviour
         return new CapturedData(GetAnimalInFrame(), thumbnail);
     }
 
-    public List<BaseAnimalAI> GetAnimalInFrame()
+    public List<BaseAnimalBrain> GetAnimalInFrame()
     {
-        List<BaseAnimalAI> result = new List<BaseAnimalAI>();
+        List<BaseAnimalBrain> result = new List<BaseAnimalBrain>();
         var allAnimals = _animalRegistry.Animals;
 
         foreach (var animal in allAnimals)
@@ -82,7 +82,7 @@ public class CameraCapture : MonoBehaviour
         return result.OrderBy(a => Vector2.Distance(new Vector2(0.5f, 0.5f), _targetCamera.WorldToViewportPoint(a.transform.position))).ToList();
     }
 
-    private bool CheckLineOfSight(Camera camera, BaseAnimalAI animal)
+    private bool CheckLineOfSight(Camera camera, BaseAnimalBrain animal)
     {
         Vector3 direction = animal.transform.position - camera.transform.position;
         float distance = direction.magnitude;
@@ -107,10 +107,10 @@ public class CameraCapture : MonoBehaviour
 
 public class CapturedData
 {
-    public List<BaseAnimalAI> animals;
+    public List<BaseAnimalBrain> animals;
     public Texture2D thumbnail;
 
-    public CapturedData(List<BaseAnimalAI> animals, Texture2D thumbnail)
+    public CapturedData(List<BaseAnimalBrain> animals, Texture2D thumbnail)
     {
         this.animals = animals;
         this.thumbnail = thumbnail;

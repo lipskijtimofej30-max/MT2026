@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Game.Scripts.Module;
+using Game.Signals;
 using UnityEngine;
 using UnityEngine.AI;
 using Zenject;
@@ -8,18 +10,18 @@ using Zenject;
 namespace Game.Scripts
 {
     [RequireComponent(typeof(NavMeshAgent), typeof(RabbitLookAt))]
-    public class RabbitAI : BaseAnimalAI
+    public class RabbitBrain : BaseAnimalBrain
     {
         [SerializeField] private NavMeshAgent _agent;
         [SerializeField] private Animator _animator;
         [SerializeField] private AnimalType _animalType = AnimalType.Rabbit;
-        [SerializeField] private float _distanceToFlee = 4f;
-        [SerializeField] private float viewAngle = 120f;
-        [SerializeField] private float eyeHeight = 0.5f;
-        [SerializeField] private float viewDistance = 10f;
+        [SerializeField] private RabbitData _dataBase;
+        [SerializeField] private RabbitData _dataCrouched;
         [SerializeField] private LayerMask _obstacleLayer;
 
+        private RabbitData _data;
         private PlayerController _playerController;
+        private SignalBus _signalBus;
         private GameMath _gameMath;
         private RabbitLookAt _lookAt;
         
@@ -30,12 +32,19 @@ namespace Game.Scripts
         private AlertState _alertState;
 
         [Inject]
-        private void Construct(GameMath gameMath, PlayerController playerController)
+        private void Construct(GameMath gameMath, PlayerController playerController, SignalBus signalBus)
         {
             _gameMath = gameMath;
             _playerController = playerController;
+            _signalBus = signalBus;
         }
-        
+
+        private void Awake()
+        {
+            _data = _dataBase;
+            _signalBus.Subscribe<PlayerCrouchedSignal>(PlayerCrouched);
+        }
+
         private async UniTaskVoid Start()
         {
             _lookAt = GetComponent<RabbitLookAt>();
@@ -43,7 +52,7 @@ namespace Game.Scripts
             
             _idleState = new IdleState(_animatorModule, CanSeePlayer,ShouldFlee,0.3f, 1f);
             _walkState = new WalkState(_agent, _animatorModule, CanSeePlayer, 5f);
-            _fleeState = new FleeState(_agent, _gameMath, _animatorModule);
+            _fleeState = new FleeState(_agent, _gameMath, _animatorModule, 12f);
             _alertState = new AlertState(_animatorModule, _lookAt, ShouldFlee, 3f,5f);
 
             Dictionary<StateAction, IState> map = new Dictionary<StateAction, IState>
@@ -61,7 +70,7 @@ namespace Game.Scripts
 
         private bool ShouldFlee()
         { 
-            return _gameMath.DistanceToPlayer(transform) < _distanceToFlee;
+            return _gameMath.DistanceToPlayer(transform) < _data.DistanceToFlee;
         }
 
         private void OnDestroy()
@@ -73,27 +82,39 @@ namespace Game.Scripts
         {
             if (_playerController == null) return false;
 
-            Vector3 eyePos = transform.position + Vector3.up * eyeHeight;
+            Vector3 eyePos = transform.position + Vector3.up * _data.EyeHeight;
             Vector3 playerPos = _playerController.transform.position + Vector3.up * 1f; // грудь игрока
             Vector3 direction = playerPos - eyePos;
 
-            // Квадрат расстояния
             float sqrDist = direction.sqrMagnitude;
-            if (sqrDist > viewDistance * viewDistance) return false;
+            if (sqrDist > _data.ViewDistance * _data.ViewDistance) return false;
 
-            // Нормализуем после проверки расстояния
             direction.Normalize();
 
-            // Проверка угла через скалярное произведение
-            float halfViewCos = Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad);
+            float halfViewCos = Mathf.Cos(_data.ViewAngle * 0.5f * Mathf.Deg2Rad);
             if (Vector3.Dot(transform.forward, direction) < halfViewCos) return false;
 
-            // Проверка препятствий
             if (Physics.Linecast(eyePos, playerPos, _obstacleLayer))
                 return false;
 
             return true;
         }
 
+        private void PlayerCrouched(PlayerCrouchedSignal signal)
+        {
+            if (signal.IsCrouched)
+                _data = _dataCrouched;
+            else
+                _data = _dataBase;
+        }
+    }
+
+    [Serializable]
+    public struct RabbitData
+    {
+        public float DistanceToFlee;
+        public float ViewAngle;
+        public float EyeHeight;
+        public float ViewDistance;
     }
 }

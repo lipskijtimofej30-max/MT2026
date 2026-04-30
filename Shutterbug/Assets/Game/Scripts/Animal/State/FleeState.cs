@@ -14,15 +14,17 @@ namespace Game.Scripts
         
         // Значительно увеличиваем дистанцию одного забега, чтобы ИИ не дергался
         private readonly float _runPointDistance = 12f; 
-        private readonly float _safeDistance = 15f; // На каком расстоянии животное считает себя в безопасности
+        private readonly float _safeDistance;
 
         public AnimalState StateType => AnimalState.Flee;
         
-        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule)
+        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule, float runPointDistance)
         {
             _agent = agent;
             _gameMath = gameMath;
             _animatorModule = animatorModule;
+            _runPointDistance = runPointDistance;
+            _safeDistance = _runPointDistance + 3f;
         }
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
