@@ -3,5 +3,6 @@ public enum AnimalState
    Idle,
    Walk,
    Flee,
-   Alert
+   Alert,
+   Eating
 }

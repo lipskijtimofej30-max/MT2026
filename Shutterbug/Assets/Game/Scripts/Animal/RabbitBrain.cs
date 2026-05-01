@@ -20,6 +20,7 @@ namespace Game.Scripts
 
         private PlayerController _playerController;
         private AnimalDataRegistry _dataRegistry;
+        private BaitRegistry _baitRegistry;
         private SignalBus _signalBus;
         private GameMath _gameMath;
         private RabbitLookAt _lookAt;
@@ -30,15 +31,17 @@ namespace Game.Scripts
         private WalkState _walkState;
         private FleeState _fleeState;
         private AlertState _alertState;
+        private EatingState _eatingState;
         
         [Inject]
         private void Construct(GameMath gameMath, PlayerController playerController, 
-           SignalBus signalBus, AnimalDataRegistry dataRegistry)
+           SignalBus signalBus, AnimalDataRegistry dataRegistry, BaitRegistry baitRegistry)
         {
             _gameMath = gameMath;
             _playerController = playerController;
             _dataRegistry = dataRegistry;
             _signalBus = signalBus;
+            _baitRegistry = baitRegistry;
         }
 
         private async UniTaskVoid Start()
@@ -48,8 +51,10 @@ namespace Game.Scripts
             _animatorModule = new RabbitAnimatorModule(_animator);
             _dataModule = new BaseDataModule(_animalType, _config, _dataRegistry);
             
-            _idleState = new IdleState(_animatorModule, CanSeePlayer,ShouldFlee, _config);
-            _walkState = new WalkState(_agent, _animatorModule, CanSeePlayer, _config);
+            _eatingState = new EatingState(_agent, _animatorModule, _baitRegistry, CanSeePlayer);
+            _idleState = new IdleState(_animatorModule, _agent,CanSeePlayer,ShouldFlee,
+                _config, _baitRegistry,_eatingState);
+            _walkState = new WalkState(_agent, _animatorModule, _baitRegistry, CanSeePlayer, _config, _eatingState);
             _fleeState = new FleeState(_agent, _gameMath, _animatorModule, _config);
             _alertState = new AlertState(_animatorModule, _lookAt, ShouldFlee,  _config);
 
@@ -58,7 +63,8 @@ namespace Game.Scripts
                 { StateAction.GoToIdle, _idleState },
                 { StateAction.GoToWalk, _walkState },
                 { StateAction.GoToSpecialState, _fleeState },
-                { StateAction.GoToAlert, _alertState }
+                { StateAction.GoToAlert, _alertState },
+                { StateAction.GoToBaitState, _eatingState}
             };
             
             _stateMachine = new StateMachine(map);

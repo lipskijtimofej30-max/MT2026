@@ -1,5 +1,6 @@
 using System;
 using Game.Scripts.Service;
+using Game.Scripts.UpgradeSystem;
 using Game.Service;
 using UnityEngine;
 using Zenject;
@@ -21,7 +22,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         private void Construct(PhotoRegistry photoRegistry, IProgressionService progressionService, IPhotoRecordProvider recordProvider)
         {
             _photoRegistry = photoRegistry;
-            _maxSlots = progressionService.CurrentLevelData.maxSlots;
+            _maxSlots = (int)progressionService.GetCurrentValue(UpgradeType.MaxAlbumSlots);
             _recordProvider = recordProvider;
         }
         

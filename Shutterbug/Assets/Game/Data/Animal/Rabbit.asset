@@ -22,3 +22,4 @@ MonoBehaviour:
   <AlertTime>k__BackingField:
     Min: 3
     Max: 5
+  <SmellRadius>k__BackingField: 15

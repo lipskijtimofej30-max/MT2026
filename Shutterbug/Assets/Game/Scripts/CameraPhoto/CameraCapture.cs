@@ -6,6 +6,7 @@ using Game.Scripts;
 using Game.Scripts.Core;
 using Game.Scripts.Factory;
 using Game.Scripts.Service;
+using Game.Scripts.UpgradeSystem;
 using UnityEngine;
 using Zenject;
 
@@ -87,7 +88,7 @@ public class CameraCapture : MonoBehaviour
         Vector3 direction = animal.transform.position - camera.transform.position;
         float distance = direction.magnitude;
     
-        if (distance > _progressionService.CurrentLevelData.captureDistance)
+        if (distance > _progressionService.GetCurrentValue(UpgradeType.CapturedDistance))
             return false;
         
         Vector3 targetPoint = animal.transform.position + Vector3.up * 0.5f; 

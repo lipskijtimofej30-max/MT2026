@@ -1,5 +1,6 @@
 using System;
 using Game.Scripts.Service;
+using Game.Scripts.UpgradeSystem;
 
 namespace Game.Scripts.CameraPhoto
 {
@@ -15,6 +16,6 @@ namespace Game.Scripts.CameraPhoto
         }
         
         public void Progress(float deltaTime) => CurrentTime = Math.Max(0f, CurrentTime - deltaTime);
-        public void Reset() => CurrentTime = _progressionService.CurrentLevelData.cooldownDuration;
+        public void Reset() => CurrentTime = _progressionService.GetCurrentValue(UpgradeType.Cooldown);
     }
 }

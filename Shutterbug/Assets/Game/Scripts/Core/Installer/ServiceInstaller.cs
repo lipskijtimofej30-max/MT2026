@@ -11,7 +11,7 @@ namespace Game.Scripts
 {
     public class ServiceInstaller : MonoInstaller
     {
-        [SerializeField] private CameraUpgradesConfig _cameraConfig;
+        [SerializeField] private StatUpgradesDatabase _statUpgradesDatabase;
         [SerializeField] private QuestDatabase _questDatabase;
         [SerializeField] private PhotoRewardConfig _rewardConfig;
         override public void InstallBindings()
@@ -22,6 +22,7 @@ namespace Game.Scripts
             Container.Bind<IAnimalInPhotoProvider>().To<AnimalInPhotoProvider>().AsSingle();
             
             Container.Bind<ICurrencyService>().To<CurrencyService>().AsSingle();
+            Container.Bind<ShopService>().AsSingle();
             
             BindQuestService();
             BindProgressionService();
@@ -44,7 +45,7 @@ namespace Game.Scripts
         private void BindProgressionService()
         {
             Container.Bind<IProgressionService>().To<ProgressionService>().AsSingle();
-            Container.Bind<CameraUpgradesConfig>().FromInstance(_cameraConfig).AsSingle();
+            Container.Bind<StatUpgradesDatabase>().FromInstance(_statUpgradesDatabase).AsSingle();
         }
 
         private void BindPhotoAlbum()

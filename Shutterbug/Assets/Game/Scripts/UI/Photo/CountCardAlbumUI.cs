@@ -1,6 +1,7 @@
 using System;
 using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Service;
+using Game.Scripts.UpgradeSystem;
 using Game.Signals;
 using TMPro;
 using UnityEngine;
@@ -12,8 +13,10 @@ namespace Game.Scripts.UI.Photo
     {
         [SerializeField] private TMP_Text countText;
         private int _maxCount;
+        private int _currentCount;
         
         private PhotoRegistry _photoRegistry;
+        private IProgressionService _progressionService;
         private SignalBus _signalBus;
 
         [Inject]
@@ -21,11 +24,12 @@ namespace Game.Scripts.UI.Photo
         {
             _photoRegistry = photoRegistry;
             _signalBus = signalBus;
+            _progressionService = progressionService;
             
-            _maxCount = progressionService.CurrentLevelData.maxSlots;
+            _maxCount = (int)progressionService.GetCurrentValue(UpgradeType.MaxAlbumSlots);
             SetText(_photoRegistry.Count);
             
-            _signalBus.Subscribe<LevelChangeSignal>(UpdateMaxCount);
+            _signalBus.Subscribe<StatUpgradeSignal>(UpdateMaxCount);
             _photoRegistry.OnCountChanged += SetText;
         }
         
@@ -36,15 +40,18 @@ namespace Game.Scripts.UI.Photo
 
         private void SetText(int count)
         {
+            _currentCount = count;
             countText.text = $"{count}/{_maxCount}";
         }
         
-
-        private void UpdateMaxCount(LevelChangeSignal signal)
+        private void UpdateMaxCount(StatUpgradeSignal signal)
         {
-            Debug.LogError("UpdateMaxCount");
-            var count = signal.Level;
-            _maxCount = count;
+            if (signal.Type == UpgradeType.MaxAlbumSlots)
+            {
+                var count = (int)_progressionService.GetCurrentValue(UpgradeType.MaxAlbumSlots);
+                _maxCount = count;
+                SetText(_currentCount);
+            }
         }
         
     }

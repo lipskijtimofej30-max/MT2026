@@ -2,6 +2,7 @@ using Cinemachine;
 using Cysharp.Threading.Tasks;
 using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Service;
+using Game.Scripts.UpgradeSystem;
 using Game.Service.Currency;
 using UnityEngine;
 using Zenject;
@@ -75,7 +76,7 @@ namespace Game.Scripts.CameraPhoto
             _view.UpdateTimerDisplay(_cooldownModule.CurrentTime);
             Ray ray = _mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
-            if (Physics.Raycast(ray, out RaycastHit hit, _progressionService.CurrentLevelData.captureDistance, _layerMask))
+            if (Physics.Raycast(ray, out RaycastHit hit, _progressionService.GetCurrentValue(UpgradeType.CapturedDistance), _layerMask))
             {
                 if (hit.collider.TryGetComponent(out BaseAnimalBrain animal))
                 {
@@ -87,7 +88,7 @@ namespace Game.Scripts.CameraPhoto
                 _view.SetInfoText("");
             }
             
-            if (_cooldownModule.IsReady && Input.GetKeyDown(KeyCode.E))
+            if (_cooldownModule.IsReady && Input.GetKeyDown(KeyCode.C))
             {
                 ExecuteCapture().Forget();
             }

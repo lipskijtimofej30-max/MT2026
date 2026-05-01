@@ -21,6 +21,8 @@ public class GameInstaller : MonoInstaller
     public override void InstallBindings()
     {
         Container.Bind<PlayerController>().FromInstance(_playerController);
+        Container.Bind<BaitRegistry>().AsSingle();
+        
         Container.BindInterfacesAndSelfTo<AnimalDataRegistry>().AsSingle();
 
         BindGame();

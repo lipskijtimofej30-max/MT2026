@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Game.Scripts.Factory;
 using UnityEngine;
 using Zenject;
@@ -7,7 +8,7 @@ namespace Game.Scripts
 {
     public class Spawner : MonoBehaviour
     {
-        [SerializeField] private List<BaseAnimalBrain> _animals = new();
+        private List<BaseAnimalBrain> _animals = new();
         [SerializeField] private List<Transform> _transformPoint;
         private IAnimalFactory _animalFactory;
 
@@ -15,6 +16,7 @@ namespace Game.Scripts
         private void Construct(IAnimalFactory animalFactory)
         {
             _animalFactory = animalFactory;
+            _animals = Resources.LoadAll<BaseAnimalBrain>("Prefabs/Animal").ToList();
         }
 
         private void Start()

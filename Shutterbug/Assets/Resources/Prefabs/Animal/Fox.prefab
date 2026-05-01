@@ -743,20 +743,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _agent: {fileID: 5274202644014786026}
   _animator: {fileID: 7436886174195804047}
+  _config: {fileID: 11400000, guid: cefc1452e47864f5ca6f612119c14d2c, type: 2}
   _animalType: 1
-  _dataBase:
-    DistanceToFlee: 4
-    ViewAngle: 105
-    EyeHeight: 0.5
-    ViewDistance: 10
-  _dataCrouched:
-    DistanceToFlee: 3
-    ViewAngle: 85
-    EyeHeight: 0.5
-    ViewDistance: 7
   _obstacleLayer:
     serializedVersion: 2
     m_Bits: 0
+  _eyeHeight: 0.5
 --- !u!114 &1906246147752415679
 MonoBehaviour:
   m_ObjectHideFlags: 0

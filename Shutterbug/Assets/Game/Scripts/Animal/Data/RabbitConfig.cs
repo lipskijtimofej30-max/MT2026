@@ -6,5 +6,6 @@ namespace Game.Data
     public class RabbitConfig : AnimalConfig
     {
         [field: SerializeField] public ValueMinMax AlertTime { get; set; }
+        [field: SerializeField] public float SmellRadius { get; set; }
     }
 }

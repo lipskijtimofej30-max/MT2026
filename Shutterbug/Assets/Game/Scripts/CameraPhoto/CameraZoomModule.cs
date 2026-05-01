@@ -1,5 +1,6 @@
 using Cinemachine;
 using Game.Scripts.Service;
+using Game.Scripts.UpgradeSystem;
 using UnityEngine;
 
 namespace Game.Scripts.CameraPhoto
@@ -17,8 +18,8 @@ namespace Game.Scripts.CameraPhoto
 
         public void UpdateZoom(float scroll)
         {
-            float newFOV = _virtualCamera.m_Lens.FieldOfView - scroll * _progressionService.CurrentLevelData.zoomSpeed;
-            newFOV = Mathf.Clamp(newFOV, _progressionService.CurrentLevelData.minFOV, _progressionService.CurrentLevelData.maxFOV);
+            float newFOV = _virtualCamera.m_Lens.FieldOfView - scroll * _progressionService.GetCurrentValue(UpgradeType.ZoomSpeed);
+            newFOV = Mathf.Clamp(newFOV, _progressionService.GetCurrentValue(UpgradeType.MinZoom), 60f);
             _virtualCamera.m_Lens.FieldOfView = newFOV;
         }
 

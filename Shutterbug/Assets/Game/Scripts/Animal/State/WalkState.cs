@@ -13,19 +13,28 @@ namespace Game.Scripts
     {
         private readonly NavMeshAgent _agent;
         private readonly RabbitAnimatorModule _animator;
+        private readonly BaitRegistry _baitRegistry;
+        private readonly EatingState _eatingState;
         private readonly Func<bool> _conditionMet;
         private readonly float _radius;
         private readonly int _maxAttempts = 10;
+        private float _baitCheckCooldown = 0.5f;
+        private float _lastBaitCheckTime = 0f;
+        private float _smellRadius; 
 
         public AnimalState StateType => AnimalState.Walk;
 
 
-        public WalkState(NavMeshAgent agent, RabbitAnimatorModule animator, Func<bool> conditionMet, AnimalConfig config)
+        public WalkState(NavMeshAgent agent, RabbitAnimatorModule animator, BaitRegistry baitRegistry,
+            Func<bool> conditionMet, RabbitConfig config, EatingState eatingState)
         {
             _agent = agent;
             _animator = animator;
             _conditionMet = conditionMet;
+            _baitRegistry = baitRegistry;
+            _eatingState = eatingState;
             _radius = config.WalkRadius;
+            _smellRadius = config.SmellRadius;
         }
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
@@ -55,6 +64,21 @@ namespace Game.Scripts
                 {
                     Debug.Log($"[WalkState] Player entered flee radius while walking, fleeing!");
                     return StateAction.GoToAlert;
+                }
+                
+                if (Time.time - _lastBaitCheckTime > _baitCheckCooldown)
+                {
+                    _lastBaitCheckTime = Time.time;
+            
+                    Bait closestBait = _baitRegistry.GetClosestBait(_agent.transform.position, _smellRadius);
+                    if (closestBait != null)
+                    {
+                        Debug.Log("Почуял приманку!");
+                        
+                        _eatingState.TargetBait = closestBait; 
+                        
+                        return StateAction.GoToBaitState;
+                    }
                 }
                 
                 if (Vector3.Distance(_agent.transform.position, lastPos) < 0.01f)
