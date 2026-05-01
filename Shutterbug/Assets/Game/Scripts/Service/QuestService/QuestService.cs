@@ -1,7 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Data;
+using Game.Scripts.CameraPhoto.PhotoAlbum;
+using Game.Service;
+using Game.Service.Currency;
 using UnityEngine;
 using Zenject;
+using Random = UnityEngine.Random;
 
 namespace Game.Scripts.Quest
 {
@@ -11,20 +17,25 @@ namespace Game.Scripts.Quest
         private Queue<PhotoQuest> _pool = new();
         private List<PhotoQuest> _availableInJournal = new();
         private PhotoQuest _activeQuest;
+        private RewardCalculator _rewardCalculator;
+        private IPhotoRecordProvider _provider;
+        private ICurrencyService _currencyService;
         
         public IReadOnlyList<PhotoQuest> AvailableInJournal => _availableInJournal;
         public PhotoQuest CurrentQuest => _activeQuest;
 
         [Inject]
-        private void Construct(QuestDatabase questDatabase)
+        private void Construct(QuestDatabase questDatabase, IPhotoRecordProvider provider, ICurrencyService currencyService)
         {
             _questDatabase = questDatabase;
+            _provider = provider;
+            _currencyService = currencyService;
         }
         public void Initialize()
         {
             var shuffled = _questDatabase.Databased.OrderBy(x => Random.value).ToList();
             foreach(var quest in shuffled) _pool.Enqueue(quest);
-
+            _rewardCalculator = new RewardCalculator();
             RefreshAvailableQuests();
         }
 
@@ -49,8 +60,37 @@ namespace Game.Scripts.Quest
         
         public void CompleteActiveQuest()
         {
+            var amount = _rewardCalculator.Validate(_activeQuest, _activeQuest.RangeReward, _provider.CurrentPhotoRecord.photoScore.TotalScore);
+            _currencyService.AddCurrency(amount);
             Debug.LogWarning($"Квест {_activeQuest.name} выполнен!!");
             _activeQuest = null;
         }
     }
+    
+    public class RewardCalculator
+    {
+        public int Validate(PhotoQuest target, List<RewardPhotoValue> values, int score)
+        {
+            foreach (var value in values)
+            {
+                if (score >= value.Range.Min && score <= value.Range.Max)
+                    return (int)(target.BaseReward * value.Multiplier);
+            }
+            return (int)target.BaseReward;
+        }
+    }
+    
+    [Serializable]
+    public struct RewardPhotoValue
+    {
+        public ValueMinMax Range;
+        public float Multiplier;
+
+        public RewardPhotoValue(ValueMinMax range,  float multiplier)
+        {
+            Range = range;
+            Multiplier = multiplier;
+        }
+    }
+
 }

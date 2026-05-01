@@ -2,6 +2,7 @@ using Cinemachine;
 using Cysharp.Threading.Tasks;
 using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Service;
+using Game.Service.Currency;
 using UnityEngine;
 using Zenject;
 
@@ -23,17 +24,19 @@ namespace Game.Scripts.CameraPhoto
         private IProgressionService _progressionService;
         private IPhotoProvider _provider;
         private IAnimalInPhotoProvider _animalInPhotoProvider;
+        private ICurrencyService _currencyService;
         private PhotoService _photoService;
 
         [Inject]
         private void Construct(PhotoEvaluator evaluator, IPhotoProvider provider, IProgressionService progressionService,
-            IAnimalInPhotoProvider animalInPhotoProvider, PhotoService photoService)
+            IAnimalInPhotoProvider animalInPhotoProvider, PhotoService photoService, ICurrencyService currencyService)
         {
             _evaluator = evaluator;
             _provider = provider;
             _progressionService = progressionService;
             _animalInPhotoProvider = animalInPhotoProvider;
             _photoService = photoService;
+            _currencyService = currencyService;
         }
 
         private void Awake()
@@ -94,7 +97,6 @@ namespace Game.Scripts.CameraPhoto
         private async UniTaskVoid ExecuteCapture()
         {
             var data = await cameraCapture.Capture();
-            
             ProcessResults(data);
 
             _cooldownModule.Reset();
@@ -106,11 +108,10 @@ namespace Game.Scripts.CameraPhoto
             {
                 var bestTarget = data.animals[0];
                 var score = _evaluator.CalculateScore(bestTarget, virtualCamera);
-                _animalInPhotoProvider.LastPhotoData = new CapturedPhotoData(bestTarget.AnimalType, bestTarget.CurrentState);
+                _animalInPhotoProvider.LastPhotoData = new CapturedPhotoData(bestTarget.AnimalType, bestTarget.StateMachine.CurrentState);
                 Debug.LogWarning($"Animal type {bestTarget.AnimalType}; current state type {bestTarget.CurrentState}; Distance to animal {Vector3.Distance(bestTarget.transform.position, virtualCamera.transform.position)} ");
                 _provider.Score = score;
-                
-                _photoService.AddPhoto(new PhotoRecord(data.thumbnail, bestTarget.AnimalType, bestTarget.CurrentState, score,
+                _photoService.AddPhoto(new PhotoRecord(data.thumbnail, bestTarget.AnimalType, bestTarget.StateMachine.CurrentState, score,
                     System.DateTime.Now.ToString("HH:mm:ss"), false));
             }
             else

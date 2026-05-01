@@ -70,7 +70,7 @@ namespace Game.Scripts.Service
             
             if (_scoreText != null)
             {
-                _scoreText.text = $"\n{photoData.AnimalType}, {photoData.AnimalState}" +
+                _scoreText.text = $"\n{photoData.AnimalType}, {photoData.AnimalState.StateType}" +
                                   $"\nОчки: {score.TotalScore}" +
                                   $"\nРазмер: {score.SizePoints}" +
                                   $"\nПоложение: {score.PlacementPoints}" +

@@ -16,5 +16,11 @@ namespace Game.Data
     {
         public float Min;
         public float Max;
+
+        public ValueMinMax(float min, float max)
+        {
+            Min = min;
+            Max = max;
+        }
     }
 }

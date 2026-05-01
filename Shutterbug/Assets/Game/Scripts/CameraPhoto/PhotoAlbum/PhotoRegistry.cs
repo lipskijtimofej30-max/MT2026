@@ -31,12 +31,12 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
     {
         public Texture2D thumbnail;
         public AnimalType animalType;
-        public AnimalState animalStateType;
+        public IState animalStateType;
         public PhotoScore photoScore;
         public string timestamp;
         public bool isSubmitted;
 
-        public PhotoRecord(Texture2D thumbnail, AnimalType animalType, AnimalState animalStateType, PhotoScore photoScore, string timestamp, bool isSubmitted)
+        public PhotoRecord(Texture2D thumbnail, AnimalType animalType, IState animalStateType, PhotoScore photoScore, string timestamp, bool isSubmitted)
         {
             this.thumbnail = thumbnail;
             this.animalType = animalType;

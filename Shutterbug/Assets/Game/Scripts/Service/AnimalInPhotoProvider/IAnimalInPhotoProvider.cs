@@ -11,9 +11,9 @@ namespace Game.Scripts.Service
     public class CapturedPhotoData
     {
         public AnimalType AnimalType;
-        public AnimalState  AnimalState;
+        public IState AnimalState;
 
-        public CapturedPhotoData(AnimalType animalType, AnimalState animalState)
+        public CapturedPhotoData(AnimalType animalType, IState animalState)
         {
             AnimalType = animalType;
             AnimalState = animalState;

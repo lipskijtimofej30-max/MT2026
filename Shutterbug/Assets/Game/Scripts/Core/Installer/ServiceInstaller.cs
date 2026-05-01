@@ -1,6 +1,9 @@
 using Game.Scripts.CameraPhoto.PhotoAlbum;
+using Game.Scripts.Data;
 using Game.Scripts.Quest;
 using Game.Scripts.Service;
+using Game.Service;
+using Game.Service.Currency;
 using UnityEngine;
 using Zenject;
 
@@ -10,6 +13,7 @@ namespace Game.Scripts
     {
         [SerializeField] private CameraUpgradesConfig _cameraConfig;
         [SerializeField] private QuestDatabase _questDatabase;
+        [SerializeField] private PhotoRewardConfig _rewardConfig;
         override public void InstallBindings()
         {
             Container.Bind<IPhotoProvider>().To<PhotoProvider>().AsSingle();
@@ -17,9 +21,12 @@ namespace Game.Scripts
             
             Container.Bind<IAnimalInPhotoProvider>().To<AnimalInPhotoProvider>().AsSingle();
             
+            Container.Bind<ICurrencyService>().To<CurrencyService>().AsSingle();
+            
             BindQuestService();
             BindProgressionService();
             BindPhotoAlbum();
+            BindRewardService();
         }
 
         private void BindQuestService()
@@ -28,6 +35,12 @@ namespace Game.Scripts
             Container.BindInterfacesAndSelfTo<QuestService>().AsSingle();
         }
 
+        private void BindRewardService()
+        {
+            Container.Bind<PhotoRewardConfig>().FromInstance(_rewardConfig).AsSingle();
+            Container.Bind<PhotoRewardService>().To<PhotoRewardService>().AsSingle().NonLazy();
+
+        }
         private void BindProgressionService()
         {
             Container.Bind<IProgressionService>().To<ProgressionService>().AsSingle();
@@ -38,6 +51,7 @@ namespace Game.Scripts
         {
             Container.Bind<PhotoRegistry>().AsSingle();
             Container.Bind<PhotoService>().AsSingle();
+            Container.Bind<IPhotoRecordProvider>().To<PhotoRecordProvider>().AsSingle();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Game.Scripts.Service;
+using Game.Service;
 using UnityEngine;
 using Zenject;
 
@@ -9,6 +10,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
     { 
         private int _maxSlots;
         private PhotoRegistry _photoRegistry;
+        private IPhotoRecordProvider _recordProvider;
         private PhotoRecord _currentPhotoRecord;
 
         public bool IsFull => _photoRegistry.Count >= _maxSlots;
@@ -16,10 +18,11 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         public event Action OnPhotoAlbumChanged;
 
         [Inject]
-        private void Construct(PhotoRegistry photoRegistry, IProgressionService progressionService)
+        private void Construct(PhotoRegistry photoRegistry, IProgressionService progressionService, IPhotoRecordProvider recordProvider)
         {
             _photoRegistry = photoRegistry;
             _maxSlots = progressionService.CurrentLevelData.maxSlots;
+            _recordProvider = recordProvider;
         }
         
         public bool AddPhoto(PhotoRecord photo)
@@ -48,6 +51,7 @@ namespace Game.Scripts.CameraPhoto.PhotoAlbum
         public void SetCurrentPhoto(PhotoRecord photo)
         {
             _currentPhotoRecord = photo;
+            _recordProvider.CurrentPhotoRecord = photo;
             Debug.LogWarning("Current photo is " + _currentPhotoRecord);
             OnPhotoAlbumChanged?.Invoke();
         }

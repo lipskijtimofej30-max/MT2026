@@ -1,5 +1,6 @@
 using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Service;
+using Game.Service;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,13 +18,13 @@ namespace Game.Scripts.Quest
 
         private PhotoQuest _currentQuest;
         private QuestService _service;
-        private PhotoService _photoService;
         private QuestJournalUI _parentJournal;
+        private IPhotoRecordProvider _recordProvider;
 
         [Inject]
-        private void Construct(PhotoService photoService)
+        private void Construct(IPhotoRecordProvider recordProvider)
         {
-            _photoService = photoService;
+            _recordProvider = recordProvider;
         }
         
         public void Construct(QuestService service, QuestJournalUI journal)
@@ -65,11 +66,12 @@ namespace Game.Scripts.Quest
 
         private void TryCompleteQuest()
         {
-            PhotoRecord currentPhoto = _photoService.CurrentPhotoRecord;
+            PhotoRecord currentPhoto = _recordProvider.CurrentPhotoRecord;
 
             if (currentPhoto == null)
             {
                 Debug.LogWarning("Нет выбранного фото для проверки квеста!");
+                return;
             }
 
             var capturedData = new CapturedPhotoData(currentPhoto.animalType, currentPhoto.animalStateType);

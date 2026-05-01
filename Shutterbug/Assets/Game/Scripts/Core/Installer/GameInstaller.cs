@@ -5,6 +5,7 @@ using Game.Scripts.Core;
 using Game.Scripts.Factory;
 using Game.Scripts.Quest;
 using Game.Scripts.UI;
+using Game.Service;
 using UnityEngine;
 using Zenject;
 
@@ -21,7 +22,7 @@ public class GameInstaller : MonoInstaller
     {
         Container.Bind<PlayerController>().FromInstance(_playerController);
         Container.BindInterfacesAndSelfTo<AnimalDataRegistry>().AsSingle();
-        
+
         BindGame();
         BindGameState();
         BindUI();
