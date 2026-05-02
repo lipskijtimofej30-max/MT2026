@@ -1,49 +1,101 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Game.Scripts;
+using Game.Scripts.Data;
 using UnityEngine;
 using Zenject;
 
 public class PlayerBait : MonoBehaviour
 {
     [SerializeField] private Transform _transformReference;
-    [SerializeField] private float _maxTimer = 10f;
     [SerializeField] private float _throwForce = 5f;
+    
+    [Header("Bait Settings")]
+    [SerializeField] private List<BaitItem> _baitTypes; 
+    [SerializeField] private float _throwCooldown = 2f;
 
-    private Bait _baitPrefab;
-    private float _time = 0f;
-    private bool _isReady => _time <= 0f;
+    private int _currentBaitIndex = 0;
+    private float _currentCooldownTimer = 0f;
 
     private BaitRegistry _baitRegistry; 
+    private IPlayerInventory _inventory;
     private DiContainer _container;
 
+    public BaitItem SelectedBait => _baitTypes.Count > 0 ? _baitTypes[_currentBaitIndex] : null;
+    
+    public bool IsReady => _currentCooldownTimer <= 0;
+
     [Inject]
-    private void Construct(BaitRegistry baitRegistry,  DiContainer container)
+    private void Construct(BaitRegistry baitRegistry, DiContainer container, IPlayerInventory inventory)
     {
         _baitRegistry = baitRegistry;
         _container = container;
-        _baitPrefab = Resources.Load<Bait>("Prefabs/Bait");
-        _time = 0f;
+        _inventory = inventory;
     }
 
     private void Update()
     {
-        if (_time > 0) _time -= Time.deltaTime;
-
-        if (_isReady && Input.GetKeyDown(KeyCode.E))
+        if (_currentCooldownTimer > 0)
         {
-            SpawnBait();
-            _time = _maxTimer;
+            _currentCooldownTimer -= Time.deltaTime;
+        }
+
+        HandleSelection();
+
+        if (Input.GetKeyDown(KeyCode.F) && IsReady)
+        {
+            TryThrowBait();
         }
     }
 
-    private void SpawnBait()
+    private void HandleSelection()
     {
-        if (_baitPrefab == null) return;
+        if (_baitTypes.Count == 0) return;
         
-        // Спавним в корень сцены (parent: null), чтобы она не летала за игроком
-        var bait = _container.InstantiatePrefabForComponent<Bait>(_baitPrefab, _transformReference.position + _transformReference.forward, Quaternion.identity, null);
+        // Быстрый выбор 1-9
+        for (int i = 0; i < _baitTypes.Count; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                _currentBaitIndex = i;
+            }
+        }
+    }
+    
+    private void TryThrowBait()
+    {
+        var item = SelectedBait;
+        if (item == null) return;
+
+        if (_inventory.Has(item, 1))
+        {
+            _inventory.RemoveItem(item, 1);
+            SpawnBait(item);
+            
+            _currentCooldownTimer = _throwCooldown; 
+        }
+        else
+        {
+            //можно вызывать событие для оповещение того что приманки нету и где то вызывать звук
+            Debug.LogWarning($"Приманка {item.Name} закончилась!");
+        }
+    }
+
+    private void SpawnBait(BaitItem data)
+    {
+        // Проверяем, назначен ли префаб в ScriptableObject
+        if (data.BaitPrefab == null)
+        {
+            Debug.LogError($"У предмета {data.Name} не назначен WorldPrefab!");
+            return;
+        }
+
+        // Спавним именно тот префаб, который привязан к выбранному предмету
+        var bait = _container.InstantiatePrefabForComponent<Bait>(
+            data.BaitPrefab, 
+            _transformReference.position + _transformReference.forward, 
+            Quaternion.identity, 
+            null);
+        
         _baitRegistry.Register(bait);
         
         if (bait.TryGetComponent<Rigidbody>(out var rb))

@@ -68,7 +68,7 @@ namespace Game.Scripts.Service
             
             _playerController.ShakeCamera(0.3f, 1f);
             
-            if (_scoreText != null)
+            if (_scoreText != null && photoData != null)
             {
                 _scoreText.text = $"\n{photoData.AnimalType}, {photoData.AnimalState.StateType}" +
                                   $"\nОчки: {score.TotalScore}" +

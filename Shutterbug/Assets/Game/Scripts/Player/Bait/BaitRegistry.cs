@@ -22,14 +22,14 @@ public class BaitRegistry
         OnBaitsChanged?.Invoke(_activeBaits);
     }
 
-    public Bait GetClosestBait(Vector3 searchPosition, float maxRadius)
+    public Bait GetClosestBait(Vector3 searchPosition, float maxRadius, BaitType preferredType)
     {
         Bait closest = null;
         float minDistanceSqr = maxRadius * maxRadius;
 
         foreach (var bait in _activeBaits)
         {
-            if (bait == null) continue;
+            if (bait == null || bait.BaitType != preferredType) continue; // Фильтруем сразу!
 
             float distSqr = (bait.transform.position - searchPosition).sqrMagnitude;
             if (distSqr < minDistanceSqr)
@@ -38,7 +38,6 @@ public class BaitRegistry
                 closest = bait;
             }
         }
-
         return closest;
     }
 }

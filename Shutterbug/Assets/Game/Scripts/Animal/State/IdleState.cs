@@ -11,16 +11,15 @@ namespace Game.Scripts
 {
     public class IdleState : IState
     {
-        private float _minTimeIdle, _maxTimeIdle;
         private RabbitAnimatorModule _animatorModule;
         private NavMeshAgent _agent;
         private EatingState _eatingState;
         private BaitRegistry _baitRegistry;
+        private RabbitConfig _config;
         private Func<bool> _conditionMetToAlert;
         private Func<bool> _conditionMetToSpecialState;
         private float _baitCheckCooldown = 0.5f;
         private float _lastBaitCheckTime = 0f;
-        private float _smellRadius; 
         public AnimalState StateType => AnimalState.Idle;
 
         /// <summary>
@@ -36,15 +35,13 @@ namespace Game.Scripts
             _baitRegistry = baitRegistry;
             _agent = agent;
             _eatingState = eatingState;
-            _smellRadius = config.SmellRadius;
-            _minTimeIdle = config.IdleTime.Min;
-            _maxTimeIdle = config.IdleTime.Max;
+            _config = config;
         }
         
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
             float elapsed = 0f;
-            float duration = Random.Range(_minTimeIdle, _maxTimeIdle);
+            float duration = Random.Range(_config.IdleTime.Min, _config.IdleTime.Max);
             
             _animatorModule.StartAnimation(RabbitAnimatorModule.IDLE);
             while (elapsed < duration)
@@ -57,8 +54,8 @@ namespace Game.Scripts
                 {
                     _lastBaitCheckTime = Time.time;
             
-                    Bait closestBait = _baitRegistry.GetClosestBait(_agent.transform.position, _smellRadius);
-                    if (closestBait != null)
+                    Bait closestBait = _baitRegistry.GetClosestBait(_agent.transform.position, _config.SmellRadius, _config.BaitType);
+                    if (closestBait != null && closestBait.BaitType == _config.BaitType)
                     {
                         Debug.Log("Почуял приманку!");
                         

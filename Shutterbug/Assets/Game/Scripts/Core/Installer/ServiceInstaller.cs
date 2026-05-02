@@ -11,6 +11,7 @@ namespace Game.Scripts
 {
     public class ServiceInstaller : MonoInstaller
     {
+        [SerializeField] private ItemDatabase _itemDatabase;
         [SerializeField] private StatUpgradesDatabase _statUpgradesDatabase;
         [SerializeField] private QuestDatabase _questDatabase;
         [SerializeField] private PhotoRewardConfig _rewardConfig;
@@ -23,6 +24,7 @@ namespace Game.Scripts
             
             Container.Bind<ICurrencyService>().To<CurrencyService>().AsSingle();
             Container.Bind<ShopService>().AsSingle();
+            Container.Bind<ItemDatabase>().FromInstance(_itemDatabase).AsSingle();
             
             BindQuestService();
             BindProgressionService();

@@ -1,5 +1,6 @@
 using DG.Tweening;
 using Game.Scripts.Core;
+using Game.Scripts.Data;
 using Game.Scripts.Service;
 using Game.Scripts.UI.Shop;
 using Game.Service;
@@ -8,6 +9,7 @@ using Zenject;
 
 public class ShopWindow : TabletWindow
 {
+    [SerializeField] private ShopItemUI _itemPrefab;
     [SerializeField] private ShopCardUI _cardPrefab;
     [SerializeField] private RectTransform _windowRoot;
     [SerializeField] private Transform _content;
@@ -20,20 +22,23 @@ public class ShopWindow : TabletWindow
     [SerializeField] private Ease _hideEase = Ease.InBack;
     
     private StatUpgradesDatabase _configs;
+    private ItemDatabase _itemDatabase;
     private IProgressionService _progressionService;
     private ShopService _shopService;
     private SignalBus _signalBus;
     
     private Coroutine _currentAnimationCoroutine;
     private bool _isOpen;
+    public bool IsItem { get; set; }
 
     [Inject]
     private void Construct(StatUpgradesDatabase configs, IProgressionService progressionService,
-        ShopService shopService, SignalBus signalBus)
+        ShopService shopService, ItemDatabase itemDatabase, SignalBus signalBus)
     {
         _configs = configs;
         _progressionService = progressionService;
         _shopService = shopService;
+        _itemDatabase = itemDatabase;
         _signalBus = signalBus;
     }
 
@@ -95,15 +100,26 @@ public class ShopWindow : TabletWindow
         }
     }
     
-    private void RefreshWindow()
+    public void RefreshWindow()
     {
         foreach (Transform child in _content) 
             Destroy(child.gameObject);
-        foreach (var statConfig in _configs.Databased)
+
+        if (!IsItem)
         {
-            var card = Instantiate(_cardPrefab, _content);
-            card.Initialize(statConfig, _progressionService, _shopService, _signalBus);
+            foreach (var statConfig in _configs.Databased)
+            {
+                var card = Instantiate(_cardPrefab, _content);
+                card.Initialize(statConfig, _progressionService, _shopService, _signalBus);
+            }
         }
-        
+        else
+        {
+            foreach (var item in _itemDatabase.Databased)
+            {
+                var card = Instantiate(_itemPrefab, _content);
+                card.Initialize(item, _shopService);
+            }   
+        }
     }
 }

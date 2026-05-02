@@ -15,12 +15,11 @@ namespace Game.Scripts
         private readonly RabbitAnimatorModule _animator;
         private readonly BaitRegistry _baitRegistry;
         private readonly EatingState _eatingState;
+        private readonly RabbitConfig _config;
         private readonly Func<bool> _conditionMet;
-        private readonly float _radius;
         private readonly int _maxAttempts = 10;
         private float _baitCheckCooldown = 0.5f;
         private float _lastBaitCheckTime = 0f;
-        private float _smellRadius; 
 
         public AnimalState StateType => AnimalState.Walk;
 
@@ -32,9 +31,8 @@ namespace Game.Scripts
             _animator = animator;
             _conditionMet = conditionMet;
             _baitRegistry = baitRegistry;
+            _config = config;
             _eatingState = eatingState;
-            _radius = config.WalkRadius;
-            _smellRadius = config.SmellRadius;
         }
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
@@ -45,7 +43,7 @@ namespace Game.Scripts
                 return StateAction.GoToAlert;
             }
             _agent.speed = 3.5f;
-            Vector3 target = GetRandomNavMeshPoint(_agent.transform.position, _radius);
+            Vector3 target = GetRandomNavMeshPoint(_agent.transform.position, _config.WalkRadius);
             if (target == Vector3.zero)
             {
                 return StateAction.GoToIdle;
@@ -70,8 +68,8 @@ namespace Game.Scripts
                 {
                     _lastBaitCheckTime = Time.time;
             
-                    Bait closestBait = _baitRegistry.GetClosestBait(_agent.transform.position, _smellRadius);
-                    if (closestBait != null)
+                    Bait closestBait = _baitRegistry.GetClosestBait(_agent.transform.position, _config.SmellRadius, _config.BaitType);
+                    if (closestBait != null && closestBait.BaitType == _config.BaitType)
                     {
                         Debug.Log("Почуял приманку!");
                         

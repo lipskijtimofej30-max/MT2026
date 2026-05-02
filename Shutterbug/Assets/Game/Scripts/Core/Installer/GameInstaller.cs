@@ -20,14 +20,20 @@ public class GameInstaller : MonoInstaller
     [SerializeField] private AnimalFactory _animalFactory;
     public override void InstallBindings()
     {
-        Container.Bind<PlayerController>().FromInstance(_playerController);
         Container.Bind<BaitRegistry>().AsSingle();
         
         Container.BindInterfacesAndSelfTo<AnimalDataRegistry>().AsSingle();
 
+        BindPlayer();
         BindGame();
         BindGameState();
         BindUI();
+    }
+
+    private void BindPlayer()
+    {
+        Container.Bind<PlayerController>().FromInstance(_playerController);
+        Container.Bind<IPlayerInventory>().To<PlayerInventory>().AsSingle();
     }
 
     private void BindGame()

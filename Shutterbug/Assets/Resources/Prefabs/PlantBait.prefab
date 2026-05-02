@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1270854169243901153}
   - component: {fileID: 5323551025017727321}
   m_Layer: 0
-  m_Name: Bait
+  m_Name: PlantBait
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

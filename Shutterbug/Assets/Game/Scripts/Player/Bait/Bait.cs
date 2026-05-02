@@ -6,7 +6,9 @@ namespace Game.Scripts
 {
     public class Bait : MonoBehaviour
     {
+        [SerializeField] private BaitType _baitType;
         private BaitRegistry _baitRegistry;
+        public BaitType BaitType => _baitType;
 
         [Inject]
         private void Construct(BaitRegistry baitRegistry)
@@ -23,5 +25,11 @@ namespace Game.Scripts
         {
             Destroy(gameObject);
         }
+    }
+
+    public enum BaitType
+    {
+        PlantBait,
+        MeatBait
     }
 }

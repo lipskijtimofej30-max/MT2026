@@ -1,3 +1,4 @@
+using Game.Scripts;
 using UnityEngine;
 
 namespace Game.Data
@@ -6,6 +7,7 @@ namespace Game.Data
     public class RabbitConfig : AnimalConfig
     {
         [field: SerializeField] public ValueMinMax AlertTime { get; set; }
+        [field: SerializeField] public BaitType BaitType { get; set; }
         [field: SerializeField] public float SmellRadius { get; set; }
     }
 }
