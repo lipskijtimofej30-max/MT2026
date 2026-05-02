@@ -21,7 +21,6 @@ namespace Game.Scripts
         private PlayerController _playerController;
         private AnimalDataRegistry _dataRegistry;
         private BaitRegistry _baitRegistry;
-        private SignalBus _signalBus;
         private GameMath _gameMath;
         private RabbitLookAt _lookAt;
         
@@ -35,19 +34,17 @@ namespace Game.Scripts
         
         [Inject]
         private void Construct(GameMath gameMath, PlayerController playerController, 
-           SignalBus signalBus, AnimalDataRegistry dataRegistry, BaitRegistry baitRegistry)
+           AnimalDataRegistry dataRegistry, BaitRegistry baitRegistry)
         {
             _gameMath = gameMath;
             _playerController = playerController;
             _dataRegistry = dataRegistry;
-            _signalBus = signalBus;
             _baitRegistry = baitRegistry;
         }
 
         private async UniTaskVoid Start()
         {
             _lookAt = GetComponent<RabbitLookAt>();
-            var handler = new DataHandler(_signalBus,  _dataRegistry);
             _animatorModule = new RabbitAnimatorModule(_animator);
             _dataModule = new BaseDataModule(_animalType, _config, _dataRegistry);
             

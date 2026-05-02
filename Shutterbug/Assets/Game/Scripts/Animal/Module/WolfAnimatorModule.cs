@@ -2,32 +2,24 @@ using UnityEngine;
 
 namespace Game.Scripts.Module
 {
-    public class RabbitAnimatorModule: IAnimatorModule
+    public class WolfAnimatorModule : IAnimatorModule
     {
-        public const int IDLE = 0;
-        public const int WALKORFLEE = 1;
-        
         private Animator _animator;
-
-        public RabbitAnimatorModule(Animator animator)
+        public WolfAnimatorModule(Animator animator)
         {
             _animator = animator;
         }
-
-        public void StartAnimation(int index = 0)
-        {
-        }
-
         public void StartAnimationIdle()
         {
-            _animator.SetFloat("AnimIndex", 0);
+            _animator.SetFloat("Vert", 0);
         }
 
         public void StartAnimationWalk()
         {
-            _animator.SetFloat("AnimIndex", 1);
+            _animator.SetFloat("Vert", 1);
+            _animator.SetFloat("State", 0);
         }
-        
+
         public void StartAnimationAlert()
         {
             StartAnimationIdle();
@@ -35,7 +27,8 @@ namespace Game.Scripts.Module
 
         public void StartAnimationSpecialState()
         {
-            StartAnimationWalk();
+            _animator.SetFloat("Vert", 1);
+            _animator.SetFloat("State", 1);
         }
 
         public void StartAnimationEating()

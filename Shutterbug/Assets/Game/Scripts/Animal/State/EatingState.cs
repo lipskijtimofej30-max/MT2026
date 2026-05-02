@@ -10,7 +10,7 @@ namespace Game.Scripts
     public class EatingState : IState
     {
         private readonly NavMeshAgent _agent;
-        private readonly RabbitAnimatorModule _animator;
+        private readonly IAnimatorModule _animator;
         private readonly BaitRegistry _baitRegistry;
         private readonly Func<bool> _conditionMetToAlert;
         
@@ -18,7 +18,7 @@ namespace Game.Scripts
 
         public Bait TargetBait { get; set; }
 
-        public EatingState(NavMeshAgent agent, RabbitAnimatorModule animator, BaitRegistry baitRegistry, Func<bool> conditionMetToAlert)
+        public EatingState(NavMeshAgent agent, IAnimatorModule animator, BaitRegistry baitRegistry, Func<bool> conditionMetToAlert)
         {
             _agent = agent;
             _animator = animator;
@@ -31,7 +31,7 @@ namespace Game.Scripts
             if (TargetBait == null) return StateAction.GoToIdle;
 
             _agent.speed = 4f; 
-            _animator.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
+            _animator.StartAnimationWalk();
             
             Vector3 lastKnownBaitPos = TargetBait.transform.position;
             _agent.SetDestination(lastKnownBaitPos);
@@ -44,7 +44,7 @@ namespace Game.Scripts
                 if (!_agent.pathPending && _agent.remainingDistance <= 1.5f)
                 {
                     _agent.ResetPath();
-                    _animator.StartAnimation(RabbitAnimatorModule.IDLE);
+                    _animator.StartAnimationEating();
                     
                     await UniTask.Delay(TimeSpan.FromSeconds(2f), cancellationToken: ct);
                     
@@ -53,7 +53,6 @@ namespace Game.Scripts
                     return StateAction.GoToIdle;
                 }
 
-                // ОПТИМИЗАЦИЯ: Обновляем путь только если приманка укатилась больше чем на 0.5 метра
                 if (Vector3.Distance(TargetBait.transform.position, lastKnownBaitPos) > 0.5f)
                 {
                     lastKnownBaitPos = TargetBait.transform.position;

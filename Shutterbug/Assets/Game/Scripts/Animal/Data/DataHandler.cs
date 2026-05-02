@@ -1,3 +1,4 @@
+using System;
 using Game.Scripts;
 using Game.Signals;
 using Zenject;
@@ -24,9 +25,12 @@ namespace Game.Data
 
         private void SetAllMultiplier(float multiplier)
         {
-            animalDataRegistry.SetToSpecialStateDistanceMultiplier(AnimalType.Rabbit, multiplier);
-            animalDataRegistry.SetViewAngleMultiplier(AnimalType.Rabbit, multiplier);
-            animalDataRegistry.SetViewDistanceMultiplier(AnimalType.Rabbit, multiplier);
+            foreach (AnimalType type in Enum.GetValues(typeof(AnimalType)))
+            {
+                animalDataRegistry.SetToSpecialStateDistanceMultiplier(type, multiplier);
+                animalDataRegistry.SetViewAngleMultiplier(type, multiplier);
+                animalDataRegistry.SetViewDistanceMultiplier(type, multiplier);
+            }
         }
     }
 }

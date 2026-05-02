@@ -4,5 +4,6 @@ public enum AnimalState
    Walk,
    Flee,
    Alert,
-   Eating
+   Eating,
+   Attack
 }

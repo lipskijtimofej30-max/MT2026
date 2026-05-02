@@ -10,7 +10,7 @@ namespace Game.Scripts.Module
         private readonly AnimalDataRegistry _registry;
         private readonly AnimalConfigState _configState;
 
-        public BaseDataModule(AnimalType type,AnimalConfig config, AnimalDataRegistry registry)
+        public BaseDataModule(AnimalType type, AnimalConfig config, AnimalDataRegistry registry)
         {
             _config = config;
             _registry = registry;

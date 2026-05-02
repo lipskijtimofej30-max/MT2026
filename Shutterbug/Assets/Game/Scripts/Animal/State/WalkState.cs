@@ -12,10 +12,10 @@ namespace Game.Scripts
     public class WalkState : IState
     {
         private readonly NavMeshAgent _agent;
-        private readonly RabbitAnimatorModule _animator;
+        private readonly IAnimatorModule _animator;
         private readonly BaitRegistry _baitRegistry;
         private readonly EatingState _eatingState;
-        private readonly RabbitConfig _config;
+        private readonly AnimalConfig _config;
         private readonly Func<bool> _conditionMet;
         private readonly int _maxAttempts = 10;
         private float _baitCheckCooldown = 0.5f;
@@ -24,8 +24,8 @@ namespace Game.Scripts
         public AnimalState StateType => AnimalState.Walk;
 
 
-        public WalkState(NavMeshAgent agent, RabbitAnimatorModule animator, BaitRegistry baitRegistry,
-            Func<bool> conditionMet, RabbitConfig config, EatingState eatingState)
+        public WalkState(NavMeshAgent agent, IAnimatorModule animator, BaitRegistry baitRegistry,
+            Func<bool> conditionMet, AnimalConfig config, EatingState eatingState)
         {
             _agent = agent;
             _animator = animator;
@@ -49,7 +49,7 @@ namespace Game.Scripts
                 return StateAction.GoToIdle;
             }
 
-            _animator.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
+            _animator.StartAnimationWalk();
             
             _agent.SetDestination(target);
 

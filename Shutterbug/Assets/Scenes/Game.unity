@@ -1403,6 +1403,7 @@ MonoBehaviour:
   _transformPoint:
   - {fileID: 1964518369}
   - {fileID: 146744222}
+  - {fileID: 146744222}
 --- !u!4 &304254483
 Transform:
   m_ObjectHideFlags: 0

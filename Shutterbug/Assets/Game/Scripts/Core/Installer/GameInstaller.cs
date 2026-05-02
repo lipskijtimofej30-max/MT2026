@@ -28,6 +28,7 @@ public class GameInstaller : MonoInstaller
         BindGame();
         BindGameState();
         BindUI();
+        Container.Bind<DataHandler>().AsSingle().NonLazy();
     }
 
     private void BindPlayer()

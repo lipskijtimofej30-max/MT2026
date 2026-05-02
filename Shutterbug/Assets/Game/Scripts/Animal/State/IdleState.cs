@@ -11,11 +11,11 @@ namespace Game.Scripts
 {
     public class IdleState : IState
     {
-        private RabbitAnimatorModule _animatorModule;
+        private IAnimatorModule _animatorModule;
         private NavMeshAgent _agent;
         private EatingState _eatingState;
         private BaitRegistry _baitRegistry;
-        private RabbitConfig _config;
+        private AnimalConfig _config;
         private Func<bool> _conditionMetToAlert;
         private Func<bool> _conditionMetToSpecialState;
         private float _baitCheckCooldown = 0.5f;
@@ -25,9 +25,9 @@ namespace Game.Scripts
         /// <summary>
         /// Передавать метод для перехода в состоние Alert
         /// </summary>
-        public IdleState(RabbitAnimatorModule animatorModule,NavMeshAgent agent, 
+        public IdleState(IAnimatorModule animatorModule,NavMeshAgent agent, 
             Func<bool> conditionMetToAlert, Func<bool> conditionMetToSpecialState,
-            RabbitConfig config, BaitRegistry baitRegistry, EatingState eatingState)
+            AnimalConfig config, BaitRegistry baitRegistry, EatingState eatingState)
         {
             _animatorModule = animatorModule;
             _conditionMetToAlert = conditionMetToAlert;
@@ -43,13 +43,15 @@ namespace Game.Scripts
             float elapsed = 0f;
             float duration = Random.Range(_config.IdleTime.Min, _config.IdleTime.Max);
             
-            _animatorModule.StartAnimation(RabbitAnimatorModule.IDLE);
+            _animatorModule.StartAnimationIdle();
             while (elapsed < duration)
             {
                 if (_conditionMetToAlert())
                     return StateAction.GoToAlert;
+                
                 if(_conditionMetToSpecialState())
                     return StateAction.GoToSpecialState;
+                
                 if (Time.time - _lastBaitCheckTime > _baitCheckCooldown)
                 {
                     _lastBaitCheckTime = Time.time;

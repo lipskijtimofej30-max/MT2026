@@ -5,7 +5,7 @@ using Zenject;
 
 namespace Game.Data
 {
-    public class AnimalDataRegistry: IInitializable
+    public class AnimalDataRegistry : IInitializable
     {
         private Dictionary<AnimalType, AnimalConfigState> _configStates;
         public void Initialize()
@@ -40,8 +40,8 @@ namespace Game.Data
     [Serializable]
     public class AnimalConfigState
     {
-        public float ViewDistanceMultiplier;
-        public float ViewAngleMultiplier;
-        public float ToSpecialStateDistanceMultiplier;
+        public float ViewDistanceMultiplier = 1f;
+        public float ViewAngleMultiplier = 1f;
+        public float ToSpecialStateDistanceMultiplier = 1f;
     }
 }

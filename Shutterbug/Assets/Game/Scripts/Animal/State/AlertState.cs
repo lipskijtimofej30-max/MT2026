@@ -9,14 +9,14 @@ namespace Game.Scripts
 {
     public class AlertState : IState
     {
-        private readonly RabbitAnimatorModule _animatorModule;
+        private readonly IAnimatorModule _animatorModule;
         private readonly RabbitLookAt _rabbitLookAt;
         private readonly Func<bool> _conditionMet;
-        private readonly RabbitConfig _config;
+        private readonly AnimalConfig _config;
         public AnimalState StateType => AnimalState.Alert;
 
-        public AlertState(RabbitAnimatorModule animatorModule, RabbitLookAt rabbitLookAt,
-            Func<bool> conditionMetToSpecialState, RabbitConfig config)
+        public AlertState(IAnimatorModule animatorModule, RabbitLookAt rabbitLookAt,
+            Func<bool> conditionMetToSpecialState, AnimalConfig config)
         {
             _animatorModule = animatorModule;
             _conditionMet = conditionMetToSpecialState;
@@ -27,10 +27,10 @@ namespace Game.Scripts
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
             Debug.Log("[AlertState] Зашли в состояние Alert");
+            if(_rabbitLookAt != null)
+                _rabbitLookAt.StartLooking(ct).Forget();
             
-            _rabbitLookAt.StartLooking(ct).Forget();
-            
-            _animatorModule.StartAnimation(RabbitAnimatorModule.IDLE);
+            _animatorModule.StartAnimationAlert();
     
             float waitTime = UnityEngine.Random.Range(_config.AlertTime.Min, _config.AlertTime.Max);
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -42,13 +42,13 @@ namespace Game.Scripts
             {
                 await UniTask.WaitUntil(() => _conditionMet(), cancellationToken: timeoutCts.Token);
                 
-                nextAction = StateAction.GoToSpecialState; // Убегаем
+                nextAction = StateAction.GoToSpecialState;
             }
             catch (OperationCanceledException)
             {
                 if (!ct.IsCancellationRequested) 
                 {
-                    nextAction = StateAction.GoToIdle; // Время вышло, успокаиваемся
+                    nextAction = StateAction.GoToIdle;
                 }
                 else 
                 {
@@ -57,7 +57,8 @@ namespace Game.Scripts
             }
             finally
             {
-                await _rabbitLookAt.StopLooking(CancellationToken.None); 
+                if(_rabbitLookAt != null)
+                    await _rabbitLookAt.StopLooking(CancellationToken.None); 
             }
 
             Debug.Log($"[AlertState] Выходим с действием: {nextAction}");

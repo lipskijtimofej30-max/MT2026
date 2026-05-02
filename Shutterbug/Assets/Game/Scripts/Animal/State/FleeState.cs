@@ -11,14 +11,14 @@ namespace Game.Scripts
     {
         private readonly NavMeshAgent _agent;
         private readonly GameMath _gameMath;
-        private readonly RabbitAnimatorModule _animatorModule;
+        private readonly IAnimatorModule _animatorModule;
         
         private readonly float _runPointDistance = 12f; 
         private readonly float _safeDistance;
 
         public AnimalState StateType => AnimalState.Flee;
         
-        public FleeState(NavMeshAgent agent, GameMath gameMath, RabbitAnimatorModule animatorModule, AnimalConfig config)
+        public FleeState(NavMeshAgent agent, GameMath gameMath, IAnimatorModule animatorModule, AnimalConfig config)
         {
             _agent = agent;
             _gameMath = gameMath;
@@ -32,9 +32,8 @@ namespace Game.Scripts
             _agent.speed = 10f;
             _agent.angularSpeed = 400f; 
             _agent.acceleration = 50f;
-            _animatorModule.StartAnimation(RabbitAnimatorModule.WALKORFLEE);
+            _animatorModule.StartAnimationSpecialState();
 
-            // Ищем первую точку для побега
             SetNewFleeDestination();
 
             while (!ct.IsCancellationRequested)

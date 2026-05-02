@@ -1,3 +1,4 @@
+using Game.Scripts;
 using UnityEngine;
 
 namespace Game.Data
@@ -9,6 +10,9 @@ namespace Game.Data
         [field: SerializeField] public float ToSpecialStateDistance { get; set; }
         [field: SerializeField] public float WalkRadius { get; set; }
         [field: SerializeField] public ValueMinMax IdleTime { get; set; }
+        [field: SerializeField] public ValueMinMax AlertTime { get; set; }
+        [field: SerializeField] public float SmellRadius { get; set; }
+        [field: SerializeField] public BaitType BaitType { get; set; }
     }
     
     [System.Serializable]
