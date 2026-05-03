@@ -19,6 +19,7 @@ using Zenject;
             [SerializeField] private float _eyeHeight = 0.5f;
 
             private PlayerController _playerController;
+            private SignalBus _signalBus;
             private AnimalDataRegistry _dataRegistry;
             private BaitRegistry _baitRegistry;
             private GameMath _gameMath;
@@ -33,12 +34,13 @@ using Zenject;
             
             [Inject]
             private void Construct(GameMath gameMath, PlayerController playerController, 
-               AnimalDataRegistry dataRegistry, BaitRegistry baitRegistry)
+               AnimalDataRegistry dataRegistry, BaitRegistry baitRegistry, SignalBus signalBus)
             {
                 _gameMath = gameMath;
                 _playerController = playerController;
                 _dataRegistry = dataRegistry;
                 _baitRegistry = baitRegistry;
+                _signalBus = signalBus;
             }
 
             private async UniTaskVoid Start()
@@ -52,7 +54,7 @@ using Zenject;
                 _walkState = new WalkState(_agent, _animatorModule, _baitRegistry, CanSeePlayer, _config, _eatingState);
                 _alertState = new AlertState(_animatorModule, null, ShouldFlee, _config);
                 _attackState = new AttackState(_agent, _animatorModule, _playerController, 
-                    _config, ShouldFlee, _gameMath);
+                    _config, ShouldFlee, _signalBus);
 
                 var map = new Dictionary<StateAction, IState>
                 {

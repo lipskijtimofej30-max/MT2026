@@ -9,7 +9,7 @@ namespace Game.Scripts.Core
         public abstract void ToggleWindow();
         public abstract void SetVisible(bool visible);
         
-        protected virtual IEnumerator ShowAnimation(RectTransform windowRoot, CanvasGroup canvasGroup,float showDuration,Ease showEase)
+        protected virtual IEnumerator ShowAnimation(RectTransform windowRoot, CanvasGroup canvasGroup, float showDuration, Ease showEase)
         {
             windowRoot.localScale = Vector3.zero;
             canvasGroup.alpha = 0f;

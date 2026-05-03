@@ -3,15 +3,17 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Game.Data;
 using Game.Scripts.Module;
+using Game.Signals;
 using UnityEngine;
 using UnityEngine.AI;
+using Zenject;
 
 namespace Game.Scripts
 {
     public class AttackState : IState
     {
         private readonly NavMeshAgent _agent;
-        private readonly GameMath _gameMath;
+        private readonly SignalBus _signalBus;
         private readonly PlayerController _playerController;
         private readonly IAnimatorModule _animatorModule;
         private readonly WolfConfig _wolfConfig;
@@ -20,12 +22,12 @@ namespace Game.Scripts
 
 
         public AttackState(NavMeshAgent agent, IAnimatorModule animatorModule, PlayerController playerController,
-            WolfConfig wolfConfig, Func<bool> conditionMet, GameMath gameMath)
+            WolfConfig wolfConfig, Func<bool> conditionMet, SignalBus signalBus)
         {
             _agent = agent;
             _animatorModule = animatorModule;
             _wolfConfig = wolfConfig;
-            _gameMath = gameMath;
+            _signalBus = signalBus;
             _playerController = playerController;
             _conditionMet = conditionMet;
         }
@@ -49,7 +51,8 @@ namespace Game.Scripts
 
                 if (Vector3.Distance(_agent.transform.position, playerPos) < _wolfConfig.DistanceToHit)
                 {
-                    Debug.Log("[AttackState] КУСЬ!");
+                    _signalBus.Fire(new AttackPlayerSignal(_playerController));   
+
                 }
 
                 await UniTask.Yield(ct);

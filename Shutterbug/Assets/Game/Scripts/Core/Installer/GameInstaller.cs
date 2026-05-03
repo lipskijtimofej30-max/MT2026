@@ -16,7 +16,13 @@ public class GameInstaller : MonoInstaller
     [SerializeField] private CameraCaptureController _cameraCaptureController;
     [SerializeField] private TabletView _tabletView;
     
+    [Header("Player")]
     [SerializeField] private PlayerController _playerController;
+    [SerializeField] private PlayerBait _playerBait;
+    [SerializeField] private Transform _respawnPoint;
+    [SerializeField] private DeathUI _deathUI;
+    
+    [Header("Other")]
     [SerializeField] private AnimalFactory _animalFactory;
     public override void InstallBindings()
     {
@@ -34,7 +40,11 @@ public class GameInstaller : MonoInstaller
     private void BindPlayer()
     {
         Container.Bind<PlayerController>().FromInstance(_playerController);
+        Container.Bind<PlayerBait>().FromInstance(_playerBait).AsSingle();
         Container.Bind<IPlayerInventory>().To<PlayerInventory>().AsSingle();
+        Container.Bind<Transform>().WithId("RespawnPoint").FromInstance(_respawnPoint).AsSingle();
+        Container.Bind<DeathUI>().FromInstance(_deathUI).AsSingle();
+        Container.BindInterfacesAndSelfTo<PlayerDeathHandler>().AsSingle();
     }
 
     private void BindGame()

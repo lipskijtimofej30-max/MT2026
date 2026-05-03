@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Plant bait
   <Description>k__BackingField: Plant bait for rabbit and bird
+  <Icon>k__BackingField: {fileID: -2078416702, guid: 89cf4f6a82e1345fea19dc1538da1340, type: 3}
   <Cost>k__BackingField: 15
   <MaxStack>k__BackingField: 5
   <BaitPrefab>k__BackingField: {fileID: 5323551025017727321, guid: 3e9db87d79a7948e18bb4245d51895b6, type: 3}

@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using Game.Scripts;
 using Game.Scripts.Data;
+using Game.Scripts.UI;
 using UnityEngine;
 using Zenject;
 
 public class PlayerBait : MonoBehaviour
 {
+    [SerializeField] private RadialMenuUI _radialMenuUI;
     [SerializeField] private Transform _transformReference;
     [SerializeField] private float _throwForce = 5f;
     
@@ -21,6 +23,7 @@ public class PlayerBait : MonoBehaviour
     private DiContainer _container;
 
     public BaitItem SelectedBait => _baitTypes.Count > 0 ? _baitTypes[_currentBaitIndex] : null;
+    public List<BaitItem > AvailableBaitTypes => _baitTypes;
     
     public bool IsReady => _currentCooldownTimer <= 0;
 
@@ -38,9 +41,10 @@ public class PlayerBait : MonoBehaviour
         {
             _currentCooldownTimer -= Time.deltaTime;
         }
-
-        HandleSelection();
-
+        
+        if (Input.GetKeyDown(KeyCode.Q)) _radialMenuUI.Open();
+        if (Input.GetKeyUp(KeyCode.Q)) _radialMenuUI.Close();
+        
         if (Input.GetKeyDown(KeyCode.F) && IsReady)
         {
             TryThrowBait();
@@ -82,14 +86,12 @@ public class PlayerBait : MonoBehaviour
 
     private void SpawnBait(BaitItem data)
     {
-        // Проверяем, назначен ли префаб в ScriptableObject
         if (data.BaitPrefab == null)
         {
             Debug.LogError($"У предмета {data.Name} не назначен WorldPrefab!");
             return;
         }
 
-        // Спавним именно тот префаб, который привязан к выбранному предмету
         var bait = _container.InstantiatePrefabForComponent<Bait>(
             data.BaitPrefab, 
             _transformReference.position + _transformReference.forward, 
@@ -101,6 +103,13 @@ public class PlayerBait : MonoBehaviour
         if (bait.TryGetComponent<Rigidbody>(out var rb))
         {
             rb.AddForce(_transformReference.forward * _throwForce, ForceMode.Impulse);
+        }
+    }
+    public void SetBaitIndex(int index)
+    {
+        if (index >= 0 && index < _baitTypes.Count)
+        {
+            _currentBaitIndex = index;
         }
     }
 }
