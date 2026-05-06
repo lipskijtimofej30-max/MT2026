@@ -37,7 +37,7 @@ namespace Game.Service
         {
             int currentCount = _playerInventory.GetCount(item);
             bool hasMoney = _currencyService.Currency >= item.Cost;
-            bool hasSpace = currentCount < item.MaxStack; // Проверка лимита
+            bool hasSpace = currentCount <= item.MaxStack;
 
             return hasMoney && hasSpace;
         }

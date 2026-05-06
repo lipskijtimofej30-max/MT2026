@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
@@ -11,16 +13,21 @@ namespace Game.Scripts.UI
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private float _fadeDuration = 1.0f;
 
-        public IEnumerator FadeOut()
+        private void Start()
         {
-            _canvasGroup.gameObject.SetActive(true);
-            yield return _canvasGroup.DOFade(1f, _fadeDuration).SetEase(Ease.InSine).WaitForCompletion();
+            _canvasGroup.alpha = 0f;
         }
 
-        public IEnumerator FadeIn()
+        public Tween FadeOut() 
         {
-            yield return _canvasGroup.DOFade(0f, _fadeDuration).SetEase(Ease.OutSine).WaitForCompletion();
-            _canvasGroup.gameObject.SetActive(false);
+            _canvasGroup.alpha = 0f;
+            return _canvasGroup.DOFade(1f, _fadeDuration).SetEase(Ease.InSine);
+        }
+
+        public Tween FadeIn() 
+        {
+            _canvasGroup.alpha = 1f;
+            return _canvasGroup.DOFade(0f, _fadeDuration).SetEase(Ease.OutSine);
         }
     }
 }

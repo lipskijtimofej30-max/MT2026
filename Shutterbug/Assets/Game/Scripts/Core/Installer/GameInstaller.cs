@@ -21,6 +21,7 @@ public class GameInstaller : MonoInstaller
     [SerializeField] private PlayerBait _playerBait;
     [SerializeField] private Transform _respawnPoint;
     [SerializeField] private DeathUI _deathUI;
+    [SerializeField] private PlayerBaseHandler _playerBaseHandler;
     
     [Header("Other")]
     [SerializeField] private AnimalFactory _animalFactory;
@@ -44,6 +45,7 @@ public class GameInstaller : MonoInstaller
         Container.Bind<IPlayerInventory>().To<PlayerInventory>().AsSingle();
         Container.Bind<Transform>().WithId("RespawnPoint").FromInstance(_respawnPoint).AsSingle();
         Container.Bind<DeathUI>().FromInstance(_deathUI).AsSingle();
+        Container.Bind<PlayerBaseHandler>().FromInstance(_playerBaseHandler).AsSingle();
         Container.BindInterfacesAndSelfTo<PlayerDeathHandler>().AsSingle();
     }
 

@@ -18,14 +18,18 @@ namespace Game.Scripts.UI.Shop
         private IProgressionService _progressionService;
         private ShopService _shopService;
         private SignalBus _bus;
+        private PlayerBaseHandler _playerBaseHandler;
 
-        public void Initialize(StatUpgradeConfig config, IProgressionService progressionService, ShopService shopService, SignalBus bus)
+        public void Initialize(StatUpgradeConfig config, IProgressionService progressionService, ShopService shopService, SignalBus bus, PlayerBaseHandler playerBaseHandler)
         {
             _config = config;
             _progressionService = progressionService;
             _shopService = shopService;
             _bus = bus;
+            _playerBaseHandler = playerBaseHandler;
             
+            _button.interactable = _playerBaseHandler.InBase && _shopService.CanUpgrade(_config.Type);
+
             SetInfoText(_config);
             _bus.Subscribe<StatUpgradeSignal>(UpgradeCurrentStat);
             _button.onClick.AddListener(() => _shopService.Upgrade(_config.Type));
@@ -45,11 +49,6 @@ namespace Game.Scripts.UI.Shop
             {
                 SetInfoText(_config);
             }
-        }
-
-        private void Update()
-        {
-            _button.interactable = _shopService.CanUpgrade(_config.Type);
         }
     }
 }

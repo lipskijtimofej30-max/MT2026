@@ -23,7 +23,7 @@ namespace Game.Scripts.CameraPhoto
             _virtualCamera.m_Lens.FieldOfView = newFOV;
         }
 
-        public void ResetZoom(float lerpSpeed = 0.4f)
+        public void ResetZoom(float lerpSpeed = 1.5f)
         {
             _virtualCamera.m_Lens.FieldOfView = Mathf.Lerp(_virtualCamera.m_Lens.FieldOfView, 60f, lerpSpeed);
         }

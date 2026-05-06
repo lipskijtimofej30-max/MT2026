@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Game.Scripts.UI;
 using Game.Signals;
 using UnityEngine;
@@ -15,12 +16,14 @@ namespace Game.Scripts
         private readonly DeathUI _deathUI;
         private readonly Transform _respawnPoint;
 
+        private bool _isProcessingDeath;
+
         public PlayerDeathHandler(
             SignalBus signalBus, 
             PlayerController player, 
             IPlayerInventory inventory, 
             DeathUI deathUI,
-            [Inject(Id = "RespawnPoint")] Transform respawnPoint) // Инъекция точки по ID из Zenject
+            [Inject(Id = "RespawnPoint")] Transform respawnPoint)
         {
             _signalBus = signalBus;
             _player = player;
@@ -29,27 +32,42 @@ namespace Game.Scripts
             _respawnPoint = respawnPoint;
         }
 
-        public void Initialize() => _signalBus.Subscribe<AttackPlayerSignal>(OnPlayerDied);
-        public void Dispose() => _signalBus.Unsubscribe<AttackPlayerSignal>(OnPlayerDied);
+        public void Initialize() => _signalBus.Subscribe<AttackPlayerSignal>(HandlePlayerDeath);
+        public void Dispose() => _signalBus.Unsubscribe<AttackPlayerSignal>(HandlePlayerDeath);
 
-        private async void OnPlayerDied(AttackPlayerSignal signal)
+        private void HandlePlayerDeath(AttackPlayerSignal signal)
         {
-            _player.enabled = false;
+            OnPlayerDiedAsync(signal).Forget(); 
+        }
 
-            await _deathUI.FadeOut().ToUniTask();
+        private async UniTaskVoid OnPlayerDiedAsync(AttackPlayerSignal signal)
+        {
+            if (_isProcessingDeath) return;
+            _isProcessingDeath = true;
 
-            _inventory.Clear();
+            try 
+            {
+                _player.enabled = false;
 
-            _player.transform.position = _respawnPoint.position;
-            _player.transform.rotation = _respawnPoint.rotation;
+                await _deathUI.FadeOut().AsyncWaitForCompletion();
+                
+                await UniTask.Delay(TimeSpan.FromSeconds(0.7f));
+                
+                _inventory.Clear();
+                _player.transform.position = _respawnPoint.position;
+                _player.transform.rotation = _respawnPoint.rotation;
 
-            await UniTask.Delay(TimeSpan.FromSeconds(1.5f));
+                await UniTask.Delay(TimeSpan.FromSeconds(1.5f));
 
-            // Место для будущих диалогов Профессора
-            Debug.Log("Профессор: 'Осторожнее, мир за пределами базы опасен...'");
+                Debug.Log("Профессор: 'Осторожнее...'");
 
-            await _deathUI.FadeIn().ToUniTask();
-            _player.enabled = true;
+                await _deathUI.FadeIn().AsyncWaitForCompletion();
+                _player.enabled = true;
+            }
+            finally 
+            {
+                _isProcessingDeath = false;
+            }
         }
     }
 }

@@ -24,4 +24,4 @@ MonoBehaviour:
     Max: 5
   <SmellRadius>k__BackingField: 10
   <BaitType>k__BackingField: 1
-  <DistanceToHit>k__BackingField: 1.5
+  <DistanceToHit>k__BackingField: 3

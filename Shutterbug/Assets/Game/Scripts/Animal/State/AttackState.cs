@@ -15,13 +15,14 @@ namespace Game.Scripts
         private readonly NavMeshAgent _agent;
         private readonly SignalBus _signalBus;
         private readonly PlayerController _playerController;
-        private readonly IAnimatorModule _animatorModule;
+        private readonly WolfAnimatorModule _animatorModule;
         private readonly WolfConfig _wolfConfig;
         private readonly Func<bool> _conditionMet;
+
         public AnimalState StateType => AnimalState.Attack;
 
 
-        public AttackState(NavMeshAgent agent, IAnimatorModule animatorModule, PlayerController playerController,
+        public AttackState(NavMeshAgent agent, WolfAnimatorModule animatorModule, PlayerController playerController,
             WolfConfig wolfConfig, Func<bool> conditionMet, SignalBus signalBus)
         {
             _agent = agent;
@@ -34,25 +35,25 @@ namespace Game.Scripts
 
         public async UniTask<StateAction> OnEnter(CancellationToken ct)
         {
-            _agent.speed = 4.5f;
+            _agent.speed = 5f;
             _agent.angularSpeed = 400f;
-            _agent.acceleration = 10f;
+            _agent.acceleration = 7.5f;
             _animatorModule.StartAnimationSpecialState();
             while (!ct.IsCancellationRequested)
             {
                 Vector3 playerPos = _playerController.transform.position;
                 _agent.SetDestination(playerPos);
 
+                if (Vector3.Distance(_agent.transform.position, playerPos) < _wolfConfig.DistanceToHit)
+                {
+                    _animatorModule.StartAnimationAttack();
+                    _signalBus.Fire(new AttackPlayerSignal(_playerController));
+                }
+                                
                 if (!_conditionMet())
                 {
                     Debug.Log("[AttackState] Игрок скрылся или слишком далеко. Прекращаем погоню.");
                     return StateAction.GoToWalk;
-                }
-
-                if (Vector3.Distance(_agent.transform.position, playerPos) < _wolfConfig.DistanceToHit)
-                {
-                    _signalBus.Fire(new AttackPlayerSignal(_playerController));   
-
                 }
 
                 await UniTask.Yield(ct);

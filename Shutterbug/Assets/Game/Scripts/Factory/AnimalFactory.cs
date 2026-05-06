@@ -6,7 +6,6 @@ namespace Game.Scripts.Factory
 {
     public class AnimalFactory: MonoBehaviour, IAnimalFactory
     {
-        
         private DiContainer _container;
         private AnimalRegistry _animalRegistry;
         

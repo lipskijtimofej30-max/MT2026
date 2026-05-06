@@ -7,7 +7,6 @@ using Zenject;
 
 public class PlayerBait : MonoBehaviour
 {
-    [SerializeField] private RadialMenuUI _radialMenuUI;
     [SerializeField] private Transform _transformReference;
     [SerializeField] private float _throwForce = 5f;
     
@@ -42,8 +41,7 @@ public class PlayerBait : MonoBehaviour
             _currentCooldownTimer -= Time.deltaTime;
         }
         
-        if (Input.GetKeyDown(KeyCode.Q)) _radialMenuUI.Open();
-        if (Input.GetKeyUp(KeyCode.Q)) _radialMenuUI.Close();
+        HandleSelection();
         
         if (Input.GetKeyDown(KeyCode.F) && IsReady)
         {
@@ -55,7 +53,6 @@ public class PlayerBait : MonoBehaviour
     {
         if (_baitTypes.Count == 0) return;
         
-        // Быстрый выбор 1-9
         for (int i = 0; i < _baitTypes.Count; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1 + i))

@@ -13,19 +13,20 @@ namespace Game.Scripts.UI.Shop
         private Item _item;
         private ShopService _shopService;
 
-        public void Initialize(Item item, ShopService shopService)
+        private PlayerBaseHandler _playerBaseHandler;
+
+        public void Initialize(Item item, ShopService shopService, PlayerBaseHandler playerBaseHandler)
         {
             _item = item;
             _shopService = shopService;
+            _playerBaseHandler = playerBaseHandler;
+            
+            _button.interactable = _playerBaseHandler.InBase && _shopService.CanBuyItem(_item);
+            
             _infoText.text = $"{item.Name}\n" +
                              $"{item.Description}\n" +
                              $"Цена {item.Cost}";
             _button.onClick.AddListener(() => _shopService.BuyItem(_item));
-        }
-        
-        private void Update()
-        {
-            _button.interactable = _shopService.CanBuyItem(_item);
         }
     }
 }

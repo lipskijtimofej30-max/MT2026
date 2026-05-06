@@ -1,10 +1,12 @@
 using DG.Tweening;
+using Game.Scripts;
 using Game.Scripts.Core;
 using Game.Scripts.Data;
 using Game.Scripts.Service;
 using Game.Scripts.UI.Shop;
 using Game.Service;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 public class ShopWindow : TabletWindow
@@ -13,6 +15,7 @@ public class ShopWindow : TabletWindow
     [SerializeField] private ShopCardUI _cardPrefab;
     [SerializeField] private RectTransform _windowRoot;
     [SerializeField] private Transform _content;
+    [SerializeField] private Image _baseStopImage;
 
     [Header("Animation Settings")]
     [SerializeField] private CanvasGroup _canvasGroup;
@@ -26,6 +29,7 @@ public class ShopWindow : TabletWindow
     private IProgressionService _progressionService;
     private ShopService _shopService;
     private SignalBus _signalBus;
+    private PlayerBaseHandler _playerBaseHandler;
     
     private Coroutine _currentAnimationCoroutine;
     private bool _isOpen;
@@ -33,13 +37,14 @@ public class ShopWindow : TabletWindow
 
     [Inject]
     private void Construct(StatUpgradesDatabase configs, IProgressionService progressionService,
-        ShopService shopService, ItemDatabase itemDatabase, SignalBus signalBus)
+        ShopService shopService, ItemDatabase itemDatabase, SignalBus signalBus, PlayerBaseHandler playerBaseHandler)
     {
         _configs = configs;
         _progressionService = progressionService;
         _shopService = shopService;
         _itemDatabase = itemDatabase;
         _signalBus = signalBus;
+        _playerBaseHandler = playerBaseHandler;
     }
 
 
@@ -104,13 +109,18 @@ public class ShopWindow : TabletWindow
     {
         foreach (Transform child in _content) 
             Destroy(child.gameObject);
-
+        
+        if(!_playerBaseHandler.InBase)
+            _baseStopImage.gameObject.SetActive(true);
+        else
+            _baseStopImage.gameObject.SetActive(false);
+        
         if (!IsItem)
         {
             foreach (var statConfig in _configs.Databased)
             {
                 var card = Instantiate(_cardPrefab, _content);
-                card.Initialize(statConfig, _progressionService, _shopService, _signalBus);
+                card.Initialize(statConfig, _progressionService, _shopService, _signalBus, _playerBaseHandler);
             }
         }
         else
@@ -118,7 +128,7 @@ public class ShopWindow : TabletWindow
             foreach (var item in _itemDatabase.Databased)
             {
                 var card = Instantiate(_itemPrefab, _content);
-                card.Initialize(item, _shopService);
+                card.Initialize(item, _shopService, _playerBaseHandler);
             }   
         }
     }

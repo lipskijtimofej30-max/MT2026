@@ -1,3 +1,4 @@
+using System;
 using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Service;
 using Game.Service;
@@ -20,11 +21,13 @@ namespace Game.Scripts.Quest
         private QuestService _service;
         private QuestJournalUI _parentJournal;
         private IPhotoRecordProvider _recordProvider;
+        private PlayerBaseHandler _playerBaseHandler;
 
         [Inject]
-        private void Construct(IPhotoRecordProvider recordProvider)
+        private void Construct(IPhotoRecordProvider recordProvider, PlayerBaseHandler playerBaseHandler)
         {
             _recordProvider = recordProvider;
+            _playerBaseHandler = playerBaseHandler;
         }
         
         public void Construct(QuestService service, QuestJournalUI journal)
@@ -87,6 +90,11 @@ namespace Game.Scripts.Quest
             {
                 Debug.LogWarning("Фото не соответствует условиям квеста!");
             }
+        }
+
+        private void Update()
+        {
+            _actionButton.interactable = gameObject.activeInHierarchy && _playerBaseHandler.InBase;
         }
     }
 }

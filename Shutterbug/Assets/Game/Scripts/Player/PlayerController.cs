@@ -22,7 +22,6 @@ namespace Game.Scripts
         
         [Header("Jump Settings")]
         [SerializeField] private bool canJump = true;
-        public bool CanJump { get => canJump; set => canJump = value; }
         
         [Header("Camera Shake Settings")]
         [SerializeField] private CinemachineVirtualCamera virtualCamera;
@@ -30,18 +29,43 @@ namespace Game.Scripts
         [SerializeField] private float shakeStrength = 1f;
         [SerializeField] private int shakeVibrato = 10;
         
+        [Header("Head Bobbing Settings")]
+        [SerializeField] private bool useHeadBob = true;
+        [SerializeField] private Transform cameraHolder;
+        [SerializeField] private float bobFrequency = 5f;
+        [SerializeField] private float bobAmplitude = 0.05f;
+        
+        [Header("Camera Tilt Settings")]
+        [SerializeField] private float tiltAmount = 2f;
+        [SerializeField] private float tiltSpeed = 5f;
+        
+        [Header("Crouch Settings")]
+        [SerializeField] private float standingHeight = 2f;
+        [SerializeField] private float crouchHeight = 1f;
+        [SerializeField] private float crouchTransitionSpeed = 10f;
+        
         private SignalBus _signalBus;
+        private CinemachineBasicMultiChannelPerlin _cinemachineNoise;
         
         private Vector3 _moveDirection;
         private Vector3 _velocity;
+        private Vector3 _standingCenter = new Vector3(0, 0, 0);
+        private Vector3 _crouchCenter = new Vector3(0, -0.5f, 0);
+        
         private float _currentSpeed;
         private float _targetRotation;
+        private float _currentTilt = 0f;
         private float _rotationVelocity;
-        private bool _isGrounded;
-        private float _scaleY;
-        private CinemachineBasicMultiChannelPerlin _cinemachineNoise;
+        private float _defaultCameraY;
+        private float _bobTimer = 0f;
+        private float _defaultY;
+        
         private bool _isCrouched;
+        private bool _isGrounded;
+
         public bool IsCrouched { get => _isCrouched; set => _isCrouched = value; }
+        public bool CanJump { get => canJump; set => canJump = value; }
+
 
         [Inject]
         private void Construct(SignalBus signalBus)
@@ -54,12 +78,18 @@ namespace Game.Scripts
         {
             controller = GetComponent<CharacterController>();
             _currentSpeed = moveSpeed;
-            _scaleY = gameObject.transform.localScale.y;
+            
+            _standingCenter = controller.center;
+            _crouchCenter = new Vector3(0, (crouchHeight - standingHeight) / 2f, 0);
+            _defaultCameraY = cameraHolder.localPosition.y;
             
             if (Camera.main != null) 
                 cameraTransform = Camera.main.transform;
             else 
                 Debug.LogError("Main camera not found in scene!");
+            
+            if (cameraHolder != null)
+                _defaultY = cameraHolder.localPosition.y;
             
             if (virtualCamera != null)
             {
@@ -89,29 +119,37 @@ namespace Game.Scripts
             HandleMovementInput();
             HandleGravityAndJump();
             ApplyFinalMovement();
+            HandleCameraTilt();
+            HandleHeadBob();
         }
 
         private void HandleCrouch()
         {
-            try
+            if (Input.GetKeyDown(KeyCode.LeftControl))
             {
-                if (Input.GetKey(KeyCode.LeftControl))
-                {
-                    _isCrouched = true;
-                    _currentSpeed = crouchSpeed;
-                    gameObject.transform.DOScaleY(_scaleY/2, 0.2f);
-                }
-                else
-                {
-                    _isCrouched = false;
-                    _currentSpeed = moveSpeed;
-                    gameObject.transform.DOScaleY(_scaleY, 0.2f);
-                }
+                _currentSpeed = crouchSpeed;
+                _isCrouched = true;
             }
-            finally
+            else if (Input.GetKeyUp(KeyCode.LeftControl))
             {
-                _signalBus.Fire(new PlayerCrouchedSignal(_isCrouched));
+                _currentSpeed = moveSpeed;
+                _isCrouched = false;
             }
+
+            float targetHeight = _isCrouched ? crouchHeight : standingHeight;
+            Vector3 targetCenter = _isCrouched ? _crouchCenter : _standingCenter;
+
+            controller.height = Mathf.Lerp(controller.height, targetHeight, Time.deltaTime * crouchTransitionSpeed);
+            controller.center = Vector3.Lerp(controller.center, targetCenter, Time.deltaTime * crouchTransitionSpeed);
+            
+            float eyeLevelMultiplier = 0.9f; 
+            float targetCameraY = controller.height * eyeLevelMultiplier + controller.center.y - (controller.height / 2f);
+            
+            Vector3 newCameraPos = cameraHolder.localPosition;
+            newCameraPos.y = Mathf.Lerp(cameraHolder.localPosition.y, targetCameraY, Time.deltaTime * crouchTransitionSpeed);
+            cameraHolder.localPosition = newCameraPos;
+
+            _signalBus.Fire(new PlayerCrouchedSignal(_isCrouched));
         }
 
         private void HandleMovementInput()
@@ -125,7 +163,7 @@ namespace Game.Scripts
             camRight.y = 0f;
             camForward.Normalize();
             camRight.Normalize();
-
+            
             Vector3 desiredMoveDirection = (camForward * vertical + camRight * horizontal).normalized;
     
             _moveDirection = desiredMoveDirection;
@@ -152,10 +190,38 @@ namespace Game.Scripts
 
         private void ApplyFinalMovement()
         {
-
             Vector3 horizontalMovement = _moveDirection * (_currentSpeed * Time.deltaTime);
             controller.Move(horizontalMovement);
             controller.Move(_velocity * Time.deltaTime);
+        }
+        
+        private void HandleCameraTilt()
+        {
+            float sidewaysInput = Input.GetAxisRaw("Horizontal");
+            
+            float targetTilt = -sidewaysInput * tiltAmount;
+            
+            _currentTilt = Mathf.Lerp(_currentTilt, targetTilt, Time.deltaTime * tiltSpeed);
+            
+            cameraHolder.localRotation = Quaternion.Euler(
+                cameraHolder.localRotation.eulerAngles.x,
+                cameraHolder.localRotation.eulerAngles.y,
+                _currentTilt
+            );
+        }
+
+        private void HandleHeadBob()
+        {
+            if (!_isGrounded) return;
+
+            float inputMag = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")).magnitude;
+            
+            if (inputMag > 0.1f)
+            {
+                _bobTimer += Time.deltaTime * bobFrequency;
+                float newY = cameraHolder.localPosition.y + Mathf.Sin(_bobTimer) * bobAmplitude;
+                cameraHolder.localPosition = new Vector3(cameraHolder.localPosition.x, newY, cameraHolder.localPosition.z);
+            }
         }
 
         /// <summary>
@@ -181,8 +247,16 @@ namespace Game.Scripts
         
         public void ToggleController(bool toggle)
         {
-            virtualCamera.enabled = toggle;
             enabled = toggle;
+            controller.enabled = toggle;
+    
+            if (!toggle)
+            {
+                _moveDirection = Vector3.zero;
+                _velocity = Vector3.zero;
+                if (cameraHolder != null) 
+                    cameraHolder.localPosition = new Vector3(cameraHolder.localPosition.x, _defaultY, cameraHolder.localPosition.z);
+            }
         }
     }
 }
