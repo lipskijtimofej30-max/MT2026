@@ -16,12 +16,11 @@ namespace Game.Scripts.Core
 
         public void Exit()
         {
-            _view.SetUIActive(false);
+            //_view.SetUIActive(false);
         }
 
         public void Update()
         {
-            throw new System.NotImplementedException();
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Game.Scripts.Core
             }
         }
         
-        private void OnModeChange(GameMode oldMode,GameMode newMode)
+        private void OnModeChange(GameMode oldMode, GameMode newMode)
         {   
             Debug.LogWarning($"Game mode was {oldMode} change to {newMode}");
         }

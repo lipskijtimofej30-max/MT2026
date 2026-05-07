@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Game.Scripts.Core;
 using Game.Scripts.UI;
 using Game.Signals;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Game.Scripts
         private readonly IPlayerInventory _inventory;
         private readonly DeathUI _deathUI;
         private readonly Transform _respawnPoint;
+        private readonly GameStateMachine _gameStateMachine;
 
         private bool _isProcessingDeath;
 
@@ -23,12 +25,14 @@ namespace Game.Scripts
             PlayerController player, 
             IPlayerInventory inventory, 
             DeathUI deathUI,
+            GameStateMachine gameStateMachine,
             [Inject(Id = "RespawnPoint")] Transform respawnPoint)
         {
             _signalBus = signalBus;
             _player = player;
             _inventory = inventory;
             _deathUI = deathUI;
+            _gameStateMachine = gameStateMachine;
             _respawnPoint = respawnPoint;
         }
 
@@ -47,6 +51,7 @@ namespace Game.Scripts
 
             try 
             {
+                _gameStateMachine.SwitchState(GameMode.Dead);
                 _player.enabled = false;
 
                 await _deathUI.FadeOut().AsyncWaitForCompletion();

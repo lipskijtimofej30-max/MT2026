@@ -19,6 +19,7 @@ namespace Game.Scripts.UI.Shop
         private ShopService _shopService;
         private SignalBus _bus;
         private PlayerBaseHandler _playerBaseHandler;
+        
 
         public void Initialize(StatUpgradeConfig config, IProgressionService progressionService, ShopService shopService, SignalBus bus, PlayerBaseHandler playerBaseHandler)
         {
@@ -34,13 +35,46 @@ namespace Game.Scripts.UI.Shop
             _bus.Subscribe<StatUpgradeSignal>(UpgradeCurrentStat);
             _button.onClick.AddListener(() => _shopService.Upgrade(_config.Type));
         }
+        
+        private bool IsMaxLevel(StatUpgradeConfig config) => config.MaxLevel == _progressionService.GetLevel(_config.Type);
 
         private void SetInfoText(StatUpgradeConfig config)
         {
             _infoText.text = $"{config.Name}\n" +
-                             $"Значение: {_progressionService.GetCurrentValue(_config.Type)} -> {config.GetValue(_progressionService.GetLevel(config.Type)+1)}\n" +
-                             $"Уровень: {_progressionService.GetLevel(_config.Type)}/{config.MaxLevel}\n" +
-                             $"Цена для следущего уровня: {config.GetPrice(_progressionService.GetLevel(config.Type)+1)}";
+                             TextForValue(config)+
+                             TextForLevel(_config)+
+                             TextForPrice(config);
+            
+        }
+
+        private string TextForValue(StatUpgradeConfig config)
+        {
+            bool isMaxLevel = IsMaxLevel(config);
+            if (!isMaxLevel)
+            {
+                return $"Значение: {_progressionService.GetCurrentValue(_config.Type)} -> {config.GetValue(_progressionService.GetLevel(config.Type) + 1)}\n";
+            }
+            return $"Значение: {_progressionService.GetCurrentValue(_config.Type)}\n";
+        }
+
+        private string TextForPrice(StatUpgradeConfig config)
+        {
+            bool isMaxLevel = IsMaxLevel(config);
+            if (!isMaxLevel)
+            {
+                return $"Цена для следущего уровня: {config.GetPrice(_progressionService.GetLevel(config.Type)+1)}";
+            }
+            return "Макс. уровень\n";
+        }
+
+        private string TextForLevel(StatUpgradeConfig config)
+        {
+            bool isMaxLevel = IsMaxLevel(config);
+            if (!isMaxLevel)
+            {
+                return $"Уровень: {_progressionService.GetLevel(_config.Type)}/{config.MaxLevel}\n";
+            }
+            return "Макс. уровень\n";
         }
 
         private void UpgradeCurrentStat(StatUpgradeSignal signal)

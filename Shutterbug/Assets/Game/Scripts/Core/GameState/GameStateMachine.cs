@@ -14,13 +14,14 @@ namespace Game.Scripts.Core
         public event Action<GameMode, GameMode> OnStateChanged;
 
         [Inject]
-        private void Construct(ExplorationState explorationState, PhotoModeState photoModeState, TabletState tabletState)
+        private void Construct(ExplorationState explorationState, PhotoModeState photoModeState, TabletState tabletState, DeadState deadState)
         {
             _states = new()
             {
                 {GameMode.Exploration, explorationState},
                 {GameMode.Photo, photoModeState},
-                {GameMode.Tablet, tabletState}
+                {GameMode.Tablet, tabletState},
+                {GameMode.Dead, deadState}
             };
         }
         
