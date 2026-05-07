@@ -24,7 +24,7 @@ namespace Game.Scripts.Core
         {
             _cameraCaptureView.SetUIActive(true);
             _cameraCaptureController.OnEnterPhotoMode();
-            _playerController.enabled = false;
+            //_playerController.enabled = false;
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
@@ -32,7 +32,7 @@ namespace Game.Scripts.Core
         public void Exit()
         {
             _cameraCaptureView.SetUIActive(false);
-            _playerController.enabled = true;
+            //_playerController.enabled = true;
             _cameraCaptureController.OnExitPhotoMode();
         }
 

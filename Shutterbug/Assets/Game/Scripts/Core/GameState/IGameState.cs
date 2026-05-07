@@ -11,5 +11,6 @@ public enum GameMode
 {
     Exploration,
     Tablet,
-    Photo
+    Photo,
+    Dead
 }

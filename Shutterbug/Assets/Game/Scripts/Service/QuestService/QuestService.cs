@@ -15,6 +15,8 @@ namespace Game.Scripts.Quest
         private QuestDatabase _questDatabase;
         private Queue<PhotoQuest> _pool = new();
         private List<PhotoQuest> _availableInJournal = new();
+        private List<SpecialQuest> _pendingSpecialQuests = new();
+        
         private PhotoQuest _activeQuest;
 
         private int _totalQuestsIssued = 0;
@@ -37,58 +39,65 @@ namespace Game.Scripts.Quest
         public void Initialize()
         {
             _rewardCalculator = new RewardCalculator();
+            _pendingSpecialQuests = new List<SpecialQuest>(_questDatabase.SpecialQuests);
             ReplenishPool();
             RefreshAvailableQuests();
         }
 
         private void ReplenishPool()
         {
-            Debug.Log("Пул пуст. Перемешиваем базу данных и наполняем заново...");
-
+            // Фильтруем, чтобы не добавить в пул то, что уже в журнале или активно
             var newQuests = _questDatabase.Databased
                 .Where(q => !_availableInJournal.Contains(q) && q != _activeQuest)
-                .OrderBy(x => Random.value) 
+                .OrderBy(x => Random.value)
                 .ToList();
-            
-            foreach (var quest in newQuests)
-            {
-                _pool.Enqueue(quest);
-                Debug.LogWarning($"Количество квестов которое было выгруженно {_totalQuestsIssued}");
-            }
+
+            _pool.Clear(); // На всякий случай чистим старый хвост
+            foreach (var q in newQuests) _pool.Enqueue(q);
         }
 
         public void RefreshAvailableQuests()
         {
-            int targetCount = Random.Range(1, 5); 
+            int targetCount = Random.Range(1, 4); 
 
             while (_availableInJournal.Count < targetCount)
             {
-                if (_pool.Count == 0)
+                if (_pool.Count == 0) ReplenishPool();
+
+                // 1. Ищем, нет ли спец-квеста для текущего прогресса
+                PhotoQuest specialToIssue = TryGetSpecialQuest();
+
+                PhotoQuest finalQuest;
+
+                if (specialToIssue != null)
                 {
-                    ReplenishPool();
+                    finalQuest = specialToIssue;
+                    Debug.Log($"<color=yellow>СЮЖЕТНЫЙ КВЕСТ:</color> {finalQuest.name} выдан на числе {_totalQuestsIssued}");
+                }
+                else
+                {
                     if (_pool.Count == 0) break;
+                    finalQuest = _pool.Dequeue();
                 }
 
-                PhotoQuest questToIssue = CheckForSpecialQuest();
-
-                if (questToIssue == null)
-                {
-                    questToIssue = _pool.Dequeue();
-                }
-
-                _availableInJournal.Add(questToIssue);
-                _totalQuestsIssued++;
-                
-                Debug.Log($"Выдан квест №{_totalQuestsIssued}: {questToIssue.name}");
+                _availableInJournal.Add(finalQuest);
             }
         }
         
-        private PhotoQuest CheckForSpecialQuest()
+        private PhotoQuest TryGetSpecialQuest()
         {
-            var special = _questDatabase.SpecialQuests
-                .FirstOrDefault(s => s.ValueForQuest == _totalQuestsIssued);
+            // Ищем первый спец-квест, чей порог мы достигли или перешагнули
+            var special = _pendingSpecialQuests
+                .FirstOrDefault(s => _totalQuestsIssued >= s.ValueForQuest);
 
-            return special.Quest;
+            if (special != null)
+            {
+                // Удаляем из списка ожидания, чтобы не выдавать его вечно
+                _pendingSpecialQuests.Remove(special);
+                return special.Quest;
+            }
+
+            return null;
         }
 
         public void AcceptQuest(PhotoQuest quest)
@@ -98,8 +107,6 @@ namespace Game.Scripts.Quest
 
             _availableInJournal.Remove(quest);
             _activeQuest = quest;
-
-            RefreshAvailableQuests();
         }
 
         public void CompleteActiveQuest()
@@ -114,6 +121,7 @@ namespace Game.Scripts.Quest
             Debug.LogWarning($"Квест {_activeQuest.name} выполнен! Награда: {amount}");
 
             _activeQuest = null;
+            _totalQuestsIssued++;
 
             RefreshAvailableQuests();
         }

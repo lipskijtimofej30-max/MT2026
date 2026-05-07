@@ -12,7 +12,7 @@ namespace Game.Scripts.Quest
     }
     
     [Serializable]
-    public struct SpecialQuest
+    public class SpecialQuest
     {
         public PhotoQuest Quest;
         public int ValueForQuest;
