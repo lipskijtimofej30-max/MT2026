@@ -59,7 +59,6 @@ namespace Game.Scripts.Quest
             ShowActive(quest);
         }
         
-        
         private void SetBaseInfo(PhotoQuest quest)
         {
             _currentQuest = quest;

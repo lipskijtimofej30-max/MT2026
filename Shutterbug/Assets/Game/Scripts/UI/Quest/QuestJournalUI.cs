@@ -1,4 +1,3 @@
-using System.Collections;
 using DG.Tweening;
 using Game.Scripts.Core;
 using Game.Scripts.Service;
