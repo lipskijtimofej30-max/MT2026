@@ -5,6 +5,6 @@ namespace Game.Scripts.Factory
 {
     public interface IAnimalFactory
     {
-        BaseAnimalBrain Spawn(Vector3 position, BaseAnimalBrain prefab);
+        BaseAnimalBrain Spawn(Vector3 position, BaseAnimalBrain prefab, Transform parent = null);
     }
 }

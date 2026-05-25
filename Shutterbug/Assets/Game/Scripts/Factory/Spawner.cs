@@ -8,8 +8,8 @@ namespace Game.Scripts
 {
     public class Spawner : MonoBehaviour
     {
-        private List<BaseAnimalBrain> _animals = new();
         [SerializeField] private List<Transform> _transformPoint;
+        private List<BaseAnimalBrain> _animals = new();
         private IAnimalFactory _animalFactory;
 
         [Inject]
@@ -21,10 +21,10 @@ namespace Game.Scripts
 
         private void Start()
         {
-            foreach (var point in _transformPoint)
+            foreach (var animal in _animals)
             {
-                var index = Random.Range(0, _animals.Count);
-                _animalFactory.Spawn(point.position, _animals[index]);
+                var index = Random.Range(0, _transformPoint.Count);
+                _animalFactory.Spawn(_transformPoint[index].position, animal, transform);
             }
         }
     }

@@ -18,7 +18,6 @@ namespace Game.Scripts
         [SerializeField] private float rotationSmoothTime = 0.12f;
         [SerializeField] private float gravity = -9.81f;
         [SerializeField] private float jumpHeight = 1.2f;
-        [SerializeField] private float crouchSpeed = 4f;
         
         [Header("Jump Settings")]
         [SerializeField] private bool canJump = true;
@@ -40,6 +39,7 @@ namespace Game.Scripts
         [SerializeField] private float tiltSpeed = 5f;
         
         [Header("Crouch Settings")]
+        [SerializeField] private float crouchSpeed = 4f;
         [SerializeField] private float standingHeight = 2f;
         [SerializeField] private float crouchHeight = 1f;
         [SerializeField] private float crouchTransitionSpeed = 10f;
@@ -65,15 +65,13 @@ namespace Game.Scripts
 
         public bool IsCrouched { get => _isCrouched; set => _isCrouched = value; }
         public bool CanJump { get => canJump; set => canJump = value; }
-
-
+        
         [Inject]
         private void Construct(SignalBus signalBus)
         {
             _signalBus = signalBus;
         }
-
-
+        
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
@@ -106,11 +104,13 @@ namespace Game.Scripts
         private void OnEnable()
         {
             Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
 
         private void OnDisable()
         {
-            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         private void Update()
@@ -246,9 +246,9 @@ namespace Game.Scripts
         }
         
         public void ToggleController(bool toggle)
-        {
+        { 
             enabled = toggle;
-            controller.enabled = toggle;
+            virtualCamera.enabled = toggle;
     
             if (!toggle)
             {
@@ -257,6 +257,11 @@ namespace Game.Scripts
                 if (cameraHolder != null) 
                     cameraHolder.localPosition = new Vector3(cameraHolder.localPosition.x, _defaultY, cameraHolder.localPosition.z);
             }
+        }
+
+        public void Toggle(bool toggle)
+        {
+            enabled = toggle;
         }
     }
 }

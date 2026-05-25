@@ -1,5 +1,6 @@
 using Game.Scripts.CameraPhoto.PhotoAlbum;
 using Game.Scripts.Data;
+using Game.Scripts.DialogueSystem;
 using Game.Scripts.Quest;
 using Game.Scripts.Service;
 using Game.Service;
@@ -11,12 +12,13 @@ namespace Game.Scripts
 {
     public class ServiceInstaller : MonoInstaller
     {
+        [SerializeField] private DialogueDatabase _dialogueDatabase;
         [SerializeField] private ItemDatabase _itemDatabase;
         [SerializeField] private StatUpgradesDatabase _statUpgradesDatabase;
         [SerializeField] private QuestDatabase _questDatabase;
         [SerializeField] private PhotoRewardConfig _rewardConfig;
         override public void InstallBindings()
-        {
+        { 
             Container.Bind<IPhotoProvider>().To<PhotoProvider>().AsSingle();
             Container.Bind<PhotoEvaluator>().To<PhotoEvaluator>().AsSingle();
             
@@ -26,10 +28,17 @@ namespace Game.Scripts
             Container.Bind<ShopService>().AsSingle();
             Container.Bind<ItemDatabase>().FromInstance(_itemDatabase).AsSingle();
             
+            BindDialogue();
             BindQuestService();
             BindProgressionService();
             BindPhotoAlbum();
             BindRewardService();
+        }
+        private void BindDialogue()
+        {
+            Container.Bind<DialogueDatabase>().FromInstance(_dialogueDatabase).AsSingle();
+            Container.BindInterfacesAndSelfTo<DialogueService>().AsSingle();
+            Container.Bind<DialogueRegistry>().AsSingle();
         }
 
         private void BindQuestService()
@@ -42,7 +51,6 @@ namespace Game.Scripts
         {
             Container.Bind<PhotoRewardConfig>().FromInstance(_rewardConfig).AsSingle();
             Container.Bind<PhotoRewardService>().To<PhotoRewardService>().AsSingle().NonLazy();
-
         }
         private void BindProgressionService()
         {

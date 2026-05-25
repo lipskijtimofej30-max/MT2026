@@ -4,7 +4,7 @@ using Zenject;
 
 namespace Game.Scripts.Factory
 {
-    public class AnimalFactory: MonoBehaviour, IAnimalFactory
+    public class AnimalFactory: IAnimalFactory
     {
         private DiContainer _container;
         private AnimalRegistry _animalRegistry;
@@ -16,9 +16,9 @@ namespace Game.Scripts.Factory
             _animalRegistry = animalRegistry;
         }
 
-        public BaseAnimalBrain Spawn(Vector3 position, BaseAnimalBrain prefab)
+        public BaseAnimalBrain Spawn(Vector3 position, BaseAnimalBrain prefab, Transform parent = null)
         {
-            var obj = _container.InstantiatePrefabForComponent<BaseAnimalBrain>(prefab.gameObject, position, Quaternion.identity, transform);
+            var obj = _container.InstantiatePrefabForComponent<BaseAnimalBrain>(prefab.gameObject, position, Quaternion.identity, parent);
             _animalRegistry.Register(obj);
             Debug.Log($"Spawn animal: {obj.name}");
             return obj;

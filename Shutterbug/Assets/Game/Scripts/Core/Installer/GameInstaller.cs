@@ -2,6 +2,7 @@ using Game.Data;
 using Game.Scripts;
 using Game.Scripts.CameraPhoto;
 using Game.Scripts.Core;
+using Game.Scripts.DialogueSystem;
 using Game.Scripts.Factory;
 using Game.Scripts.Quest;
 using Game.Scripts.UI;
@@ -22,21 +23,20 @@ public class GameInstaller : MonoInstaller
     [SerializeField] private Transform _respawnPoint;
     [SerializeField] private DeathUI _deathUI;
     [SerializeField] private PlayerBaseHandler _playerBaseHandler;
-    
-    [Header("Other")]
-    [SerializeField] private AnimalFactory _animalFactory;
+
+
     public override void InstallBindings()
     {
         Container.Bind<BaitRegistry>().AsSingle();
         
         Container.BindInterfacesAndSelfTo<AnimalDataRegistry>().AsSingle();
-
         BindPlayer();
         BindGame();
         BindGameState();
         BindUI();
         Container.Bind<DataHandler>().AsSingle().NonLazy();
     }
+    
 
     private void BindPlayer()
     {
@@ -52,7 +52,7 @@ public class GameInstaller : MonoInstaller
     private void BindGame()
     {
         Container.Bind<GameMath>().To<GameMath>().AsSingle();
-        Container.Bind<IAnimalFactory>().FromInstance(_animalFactory).AsSingle();
+        Container.Bind<IAnimalFactory>().To<AnimalFactory>().AsSingle();
         Container.Bind<AnimalRegistry>().To<AnimalRegistry>().AsSingle();
     }
 

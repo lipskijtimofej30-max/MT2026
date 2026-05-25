@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Game.Scripts.Core;
+using Game.Scripts.DialogueSystem;
 using Game.Scripts.UI;
 using Game.Signals;
 using UnityEngine;
@@ -35,16 +36,16 @@ namespace Game.Scripts
             _gameStateMachine = gameStateMachine;
             _respawnPoint = respawnPoint;
         }
-
+        
         public void Initialize() => _signalBus.Subscribe<AttackPlayerSignal>(HandlePlayerDeath);
         public void Dispose() => _signalBus.Unsubscribe<AttackPlayerSignal>(HandlePlayerDeath);
 
         private void HandlePlayerDeath(AttackPlayerSignal signal)
         {
-            OnPlayerDiedAsync(signal).Forget(); 
+            OnPlayerDiedAsync().Forget(); 
         }
 
-        private async UniTaskVoid OnPlayerDiedAsync(AttackPlayerSignal signal)
+        private async UniTaskVoid OnPlayerDiedAsync()
         {
             if (_isProcessingDeath) return;
             _isProcessingDeath = true;
@@ -63,8 +64,7 @@ namespace Game.Scripts
                 _player.transform.rotation = _respawnPoint.rotation;
 
                 await UniTask.Delay(TimeSpan.FromSeconds(1.5f));
-
-                Debug.Log("Профессор: 'Осторожнее...'");
+                
 
                 await _deathUI.FadeIn().AsyncWaitForCompletion();
                 _player.enabled = true;

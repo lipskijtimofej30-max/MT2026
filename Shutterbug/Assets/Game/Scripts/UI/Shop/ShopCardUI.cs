@@ -64,7 +64,7 @@ namespace Game.Scripts.UI.Shop
             {
                 return $"Цена для следущего уровня: {config.GetPrice(_progressionService.GetLevel(config.Type)+1)}";
             }
-            return "Макс. уровень\n";
+            return "\n";
         }
 
         private string TextForLevel(StatUpgradeConfig config)
@@ -74,7 +74,7 @@ namespace Game.Scripts.UI.Shop
             {
                 return $"Уровень: {_progressionService.GetLevel(_config.Type)}/{config.MaxLevel}\n";
             }
-            return "Макс. уровень\n";
+            return "\nМакс. уровень\n";
         }
 
         private void UpgradeCurrentStat(StatUpgradeSignal signal)
